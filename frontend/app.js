@@ -1,20 +1,35 @@
 // ============================================================================
 // AquaGuard dashboard — no build step, plain fetch calls.
 //
-// Talks to THREE things:
+// Talks to FOUR things:
 //  1. The flood-risk-classifier service  -> http://127.0.0.1:8000
 //  2. The discharge-forecaster service   -> http://127.0.0.1:8001
 //  3. Open-Meteo's free current-weather API (no key needed, external)
-//
-// Sensor readings / tank fill in this page are DEMO DATA (a gentle random
-// walk), clearly labeled as such — see the "DEMO DATA" badges. They are NOT
-// read from Firebase yet; that wiring is intentionally deferred until the
-// hardware rebuild finishes full reintegration (hardware/HARDWARE_LOG.md).
+//  4. Firebase Realtime Database -> live sensor readings + pump control,
+//     the same /sensor/*, /pumps/* paths hardware/AquaGuard_v2/AquaGuard_v2.ino
+//     reads/writes. Plain REST (fetch), no SDK -- see fbGet/fbPut below.
 // ============================================================================
 
 const CLASSIFIER_BASE     = "http://127.0.0.1:8000";
 const DISCHARGE_BASE      = "http://127.0.0.1:8001";
 const SUSCEPTIBILITY_BASE = "http://127.0.0.1:8002";
+const FIREBASE_BASE_URL   = "https://aquasheild-2e2ca-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+async function fbGet(path) {
+  const res = await fetch(`${FIREBASE_BASE_URL}/${path}.json`);
+  if (!res.ok) throw new Error(`Firebase GET ${path} failed: HTTP ${res.status}`);
+  return res.json();
+}
+
+async function fbPut(path, value) {
+  const res = await fetch(`${FIREBASE_BASE_URL}/${path}.json`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(value),
+  });
+  if (!res.ok) throw new Error(`Firebase PUT ${path} failed: HTTP ${res.status}`);
+  return res.json();
+}
 
 let currentLocation = null; // { lat, lon, label, station_id | null }
 let stationsCache = [];
@@ -447,21 +462,35 @@ function escapeHtml(str) {
 }
 
 // ---------------------------------------------------------------------------
-// Pump control — SIMULATED only. Local on-screen state, no Firebase writes.
-// Once the hardware rebuild reintegrates WiFi/Firebase, replace the two
-// setPump() calls below with real writes to /pumps/pump1 and /pumps/pump2
-// (the same paths the ESP32 sketch's controlPumps() already reads).
+// Pump control — REAL. Writes to /pumps/pump1 and /pumps/pump2, the same
+// paths hardware/AquaGuard_v2/AquaGuard_v2.ino's controlPumps() reads and
+// drives the relay from. setPump() updates the UI immediately (optimistic —
+// feels instant on click) and also fires the Firebase write; the live poller
+// further down (pollSensorsAndPumps()) reconciles the UI to whatever
+// Firebase actually reports every few seconds, so it stays correct even if
+// a write fails, drops, or the pump state changes from something other than
+// this page (e.g. a second browser tab).
 // ---------------------------------------------------------------------------
 const pumpState = { 1: false, 2: false };
 let cycleTimer = null;
 
-function setPump(num, isOn) {
+function setPump(num, isOn, { write = true } = {}) {
   pumpState[num] = isOn;
   const chip = document.getElementById(`pump${num}Status`);
   const btn = document.getElementById(`pump${num}Toggle`);
   chip.className = `status-chip ${isOn ? "good on-pulse" : "muted"}`;
   chip.innerHTML = `<span class="status-dot"></span>${isOn ? "ON" : "OFF"}`;
   btn.textContent = isOn ? "Turn OFF" : "Turn ON";
+  // aria-pressed, not role="switch": this is a <button> that performs a
+  // toggle action, which is the correct ARIA pattern for that element (a
+  // real switch role belongs on checkbox-style inputs, not buttons).
+  btn.setAttribute("aria-pressed", String(isOn));
+
+  if (write) {
+    fbPut(`pumps/pump${num}`, isOn).catch(e => {
+      console.error(`Couldn't write pump${num} state to Firebase:`, e);
+    });
+  }
 }
 
 function setManualPumpControlsEnabled(enabled) {
@@ -533,42 +562,160 @@ document.getElementById("cancelCycle").addEventListener("click", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Demo sensor data — a gentle random walk, clearly labeled DEMO DATA in the
-// UI. NOT connected to Firebase. See hardware/HARDWARE_LOG.md for real
-// hardware status.
+// Live sensor data — polled from Firebase (/sensor/*), the same path
+// hardware/AquaGuard_v2/AquaGuard_v2.ino publishes to every ~1.5s.
 // ---------------------------------------------------------------------------
-const demoState = { ph: 7.4, tds: 320, temp: 27.5, level: 42 }; // level = cm from ultrasonic sensor
-const TANK_HEIGHT_CM = 60; // assumed tank depth for the fill-percentage visual only
+// TANK_HEIGHT_CM is still an ASSUMED placeholder, not a measured constant --
+// the firmware currently publishes /sensor/waterLevel as raw ultrasonic
+// distance (sensor-to-water-surface, smaller = more water), not yet
+// converted to "cm of water" (see AquaGuard_v2.ino's own header comment,
+// "STILL NOT included"). The fill-percentage math below divides by this
+// constant as if waterLevel were already water depth, which is only
+// correct once that conversion is built and this constant is set to the
+// real measured sensor-mount height. Until then, treat the tank fill
+// percentage/visual as approximate, not calibrated -- the 4 sensor tiles
+// above it (pH/TDS/temp/level) are real regardless.
+const TANK_HEIGHT_CM = 60;
 
-function walk(value, min, max, step) {
-  const next = value + (Math.random() - 0.5) * step;
-  return Math.max(min, Math.min(max, next));
+let sensorPollFailures = 0;
+
+// ---------------------------------------------------------------------------
+// Sensor thresholds — one source of truth for the gauge ring color, the tile
+// status chip, and the alert banner, so "warning" or "critical" always means
+// the same thing everywhere on this page. `min`/`max` set the full range the
+// gauge ring sweeps; `good`/`warn` are inclusive bands within that range.
+// Anything outside `warn` is critical. These are real aquaculture-safe
+// ranges (pH/TDS/temperature) except `level`, which inherits the same
+// TANK_HEIGHT_CM caveat noted above -- not calibrated to a real measured
+// tank depth yet.
+// ---------------------------------------------------------------------------
+const SENSOR_CONFIG = {
+  ph:    { label: "pH",  min: 0, max: 14,          good: [6.5, 8.5], warn: [6.45, 8.55], format: v => v.toFixed(2) },
+  tds:   { label: "TDS", min: 0, max: 1000,        good: [0, 500],   warn: [0, 560],     format: v => `${Math.round(v)}` },
+  temp:  { label: "Temperature", min: 0, max: 40,  good: [20, 30],   warn: [19, 31],     format: v => v.toFixed(1) },
+  level: { label: "Water level", min: 0, max: TANK_HEIGHT_CM, good: [20, 55], warn: [10, TANK_HEIGHT_CM], format: v => v.toFixed(1) },
+};
+const SPARKLINE_LEN = 30;
+const sensorHistory = { ph: [], tds: [], temp: [], level: [] };
+
+function classifySensor(key, value) {
+  const { good, warn } = SENSOR_CONFIG[key];
+  if (value >= good[0] && value <= good[1]) return "good";
+  if (value >= warn[0] && value <= warn[1]) return "warning";
+  return "critical";
 }
 
-function tickDemoSensors() {
-  demoState.ph = walk(demoState.ph, 6.4, 8.6, 0.06);
-  demoState.tds = walk(demoState.tds, 150, 600, 8);
-  demoState.temp = walk(demoState.temp, 22, 32, 0.15);
-  demoState.level = walk(demoState.level, 10, TANK_HEIGHT_CM - 2, 1.2);
+const CHIP_TEXT = { good: ["✓", "OK"], warning: ["!", "WARN"], critical: ["▲", "ALERT"] };
 
-  document.getElementById("tile-ph").textContent = demoState.ph.toFixed(2);
-  document.getElementById("tile-tds").textContent = Math.round(demoState.tds);
-  document.getElementById("tile-temp").textContent = demoState.temp.toFixed(1);
-  document.getElementById("tile-level").textContent = demoState.level.toFixed(1);
+function renderSensorTile(key, value) {
+  const cfg = SENSOR_CONFIG[key];
 
-  const fillPct = Math.max(0, Math.min(100, (demoState.level / TANK_HEIGHT_CM) * 100));
-  document.getElementById("tankLevelPct").textContent = `${fillPct.toFixed(0)}%`;
-  const waterRect = document.getElementById("tankWater");
-  const tankTop = 8, tankBottom = 152, tankFullHeight = tankBottom - tankTop;
-  const waterHeight = (fillPct / 100) * tankFullHeight;
-  waterRect.setAttribute("y", tankBottom - waterHeight);
-  waterRect.setAttribute("height", waterHeight);
+  // pH in particular is legitimately absent from Firebase until the probe
+  // has been calibrated at least once (AquaGuard_v2.ino only ever writes
+  // /sensor/ph after a successful calibration) -- show that honestly
+  // instead of a fabricated number or a silent gap.
+  if (value == null || Number.isNaN(value)) {
+    document.getElementById(`tile-${key}`).textContent = key === "ph" ? "—" : "—";
+    const chip = document.getElementById(`chip-${key}`);
+    chip.className = "status-chip muted tile-chip";
+    chip.innerHTML = `<span class="status-dot"></span>${key === "ph" ? "NOT CALIBRATED" : "NO DATA"}`;
+    return null;
+  }
+
+  const status = classifySensor(key, value);
+
+  document.getElementById(`tile-${key}`).textContent = cfg.format(value);
+
+  const pct = Math.max(0, Math.min(100, ((value - cfg.min) / (cfg.max - cfg.min)) * 100));
+  const ring = document.getElementById(`gauge-${key}`);
+  ring.style.setProperty("--gauge-pct", pct.toFixed(1));
+  ring.style.setProperty("--gauge-color", `var(--status-${status})`);
+
+  const chip = document.getElementById(`chip-${key}`);
+  const [icon, text] = CHIP_TEXT[status];
+  chip.className = `status-chip ${status} tile-chip`;
+  chip.innerHTML = `<span class="status-dot"></span>${icon} ${text}`;
+
+  const hist = sensorHistory[key];
+  hist.push(value);
+  if (hist.length > SPARKLINE_LEN) hist.shift();
+  const lo = Math.min(...hist), hi = Math.max(...hist);
+  const span = hi - lo || 1; // avoid /0 before enough history varies
+  const points = hist
+    .map((v, i) => {
+      const x = (i / Math.max(1, hist.length - 1)) * 100;
+      const y = 26 - ((v - lo) / span) * 24; // invert: higher value -> higher on screen
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  document.querySelector(`#spark-${key} polyline`).setAttribute("points", points);
+
+  return status;
+}
+
+function updateSensorAlertBanner(statuses) {
+  const banner = document.getElementById("sensorAlertBanner");
+  const critical = Object.entries(statuses).filter(([, s]) => s === "critical").map(([k]) => SENSOR_CONFIG[k].label);
+  const warning = Object.entries(statuses).filter(([, s]) => s === "warning").map(([k]) => SENSOR_CONFIG[k].label);
+
+  if (critical.length) {
+    banner.className = "alert-banner critical";
+    banner.textContent = `▲ ${critical.join(", ")} out of safe range — check the tank now.`;
+    banner.style.display = "flex";
+  } else if (warning.length) {
+    banner.className = "alert-banner warning";
+    banner.textContent = `! ${warning.join(", ")} approaching the edge of the safe range.`;
+    banner.style.display = "flex";
+  } else {
+    banner.style.display = "none";
+  }
+}
+
+async function pollSensorsAndPumps() {
+  try {
+    const [sensor, pumps] = await Promise.all([fbGet("sensor"), fbGet("pumps")]);
+    sensorPollFailures = 0;
+
+    updateSensorAlertBanner({
+      ph: renderSensorTile("ph", sensor?.ph),
+      tds: renderSensorTile("tds", sensor?.tds),
+      temp: renderSensorTile("temp", sensor?.temp),
+      level: renderSensorTile("level", sensor?.waterLevel),
+    });
+
+    if (typeof sensor?.waterLevel === "number") {
+      const fillPct = Math.max(0, Math.min(100, (sensor.waterLevel / TANK_HEIGHT_CM) * 100));
+      document.getElementById("tankLevelPct").textContent = `${fillPct.toFixed(0)}%`;
+      const waterRect = document.getElementById("tankWater");
+      const tankTop = 8, tankBottom = 152, tankFullHeight = tankBottom - tankTop;
+      const waterHeight = (fillPct / 100) * tankFullHeight;
+      waterRect.setAttribute("y", tankBottom - waterHeight);
+      waterRect.setAttribute("height", waterHeight);
+    }
+
+    // Reconcile pump chips/buttons to whatever Firebase actually reports --
+    // but only when a local water-cycle animation isn't actively driving
+    // them (cycleTimer set), so this poll doesn't visually fight with that
+    // timer's own in-progress phase.
+    if (!cycleTimer && pumps) {
+      if (typeof pumps.pump1 === "boolean") setPump(1, pumps.pump1, { write: false });
+      if (typeof pumps.pump2 === "boolean") setPump(2, pumps.pump2, { write: false });
+    }
+  } catch (e) {
+    sensorPollFailures += 1;
+    if (sensorPollFailures === 1) {
+      // Only surface this on the first failure, not every failed poll --
+      // avoids flickering an error state between two otherwise-fine reads
+      // if a single request happens to drop.
+      console.error("Couldn't reach Firebase for live sensor/pump data:", e);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
 loadStations();
-tickDemoSensors();
-setInterval(tickDemoSensors, 2500);
+pollSensorsAndPumps();
+setInterval(pollSensorsAndPumps, 3000);
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateThemeIcon);

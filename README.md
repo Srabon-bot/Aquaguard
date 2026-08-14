@@ -82,17 +82,16 @@ Written plainly, not to oversell what's finished:
 - ✅ **All 3 flood models**: trained, tested, documented, each with its own PDF report in `reports/`.
 - ✅ **Dashboard**: real, live calls to all 3 models; the 3-model pipeline (cascade + combined
   summary) is built and working.
-- ⏳ **Hardware sensor readings on the dashboard**: currently **demo data** (a random walk, clearly
-  labeled as such in the UI) — 4 of 7 physical sensors are individually wired and confirmed working
-  (see `hardware/HARDWARE_LOG.md`), but not yet streaming live to the dashboard.
-- ⏳ **Pump control on the dashboard**: currently **simulated** (changes on-screen state only, no
-  real relay control) — the relay hardware itself is sketch-tested but not yet wired to real pumps.
-- ⏳ **Live ESP32 → dashboard link + pump automation logic**: in progress. `hardware/FIREBASE_SETUP.md`
-  is the first step (setting up the free database that will carry live sensor data and pump commands
-  between the physical device and the dashboard).
-- ⏳ **pH calibration page** (`ph-calibration.html`, linked from the dashboard header): code and
-  firmware side (`hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino`) are written, but need a
-  real Firebase project (see above) and a real ESP32 flash before this actually works end to end.
+- ✅ **Hardware sensor readings + pump control on the dashboard**: real Firebase reads/writes
+  (`/sensor/*`, `/pumps/*`) — the website side is fully wired and verified live against the real
+  Firebase project. What's still pending is the physical device: 4 of 7 sensors are individually
+  wired and confirmed working (see `hardware/HARDWARE_LOG.md`), but `hardware/AquaGuard_v2/
+  AquaGuard_v2.ino` hasn't been flashed to real hardware yet — once it is, the dashboard needs no
+  further changes, it'll just start showing real numbers.
+- ✅ **pH calibration page** (`ph-calibration.html`) and **Analytics page** (`analytics.html`,
+  day/week/month historical charts from Firebase's `/history`): both fully wired to the real
+  Firebase project, verified live end-to-end with real writes/reads/cleanup. Same as above — waiting
+  on the physical ESP32 flash, not on any more website code.
 - ✅ **Public hosting (Vercel)**: `frontend-glass/` is live at
   **[frontend-glass-lilac.vercel.app](https://frontend-glass-lilac.vercel.app)** (static, zero-config,
   redeploy with `vercel deploy --prod` from that folder). **Important limitation**: the model buttons

@@ -22,13 +22,12 @@
 <main>
 
   <!-- ===================== Setup notice ===================== -->
-  <section class="panel neu-flat" aria-label="Setup required">
+  <section class="panel neu-flat" aria-label="About this page">
     <p class="model-desc">
       This page talks directly to your Firebase Realtime Database — the same one the ESP32 firmware
-      (<code>hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino</code>) uses. Before this page
-      works, open <code>ph-calibration.js</code> and set <code>FIREBASE_BASE_URL</code> to your
-      project's databaseURL (see <code>hardware/FIREBASE_SETUP.md</code>) — it's a plain constant near
-      the top of the file, not a secret.
+      (<code>hardware/AquaGuard_v2/AquaGuard_v2.ino</code>) uses. Already wired to the AquaSheild
+      project's database (<code>FIREBASE_BASE_URL</code> in <code>ph-calibration.js</code>) — nothing
+      to configure here, this will show live data as soon as the ESP32 is flashed and running.
     </p>
   </section>
 

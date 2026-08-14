@@ -17,6 +17,7 @@
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
+    <a href="analytics.html" class="neu-btn" title="Historical sensor trends">📊 Analytics</a>
     <a href="ph-calibration.html" class="neu-btn" title="Calibrate the pH sensor">🧪 pH calibration</a>
     <button id="themeToggle" class="neu-btn icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
       <span id="themeIcon">🌙</span>
@@ -52,7 +53,7 @@
     <section class="panel neu-raised" aria-label="Tank state">
       <div class="panel-header-row">
         <h2>Tank state</h2>
-        <span class="demo-badge" title="Placeholder values — will show real readings once the hardware rebuild finishes full reintegration (see hardware/HARDWARE_LOG.md)">DEMO DATA</span>
+        <span class="demo-badge" title="Computed from the real water-level sensor, but the fill % assumes a placeholder tank depth (60cm) until the sensor's real mount height is measured and calibrated — see app.js's TANK_HEIGHT_CM comment.">APPROXIMATE FILL %</span>
       </div>
       <div class="tank-visual-wrap">
         <svg id="tankSvg" viewBox="0 0 120 160" class="tank-svg" aria-hidden="true">
@@ -74,7 +75,6 @@
   <section class="panel" aria-label="Live sensor readings">
     <div class="panel-header-row">
       <h2>Sensor readings</h2>
-      <span class="demo-badge" title="Placeholder values — will show real readings once the hardware rebuild finishes full reintegration (see hardware/HARDWARE_LOG.md)">DEMO DATA</span>
     </div>
     <div id="sensorAlertBanner" class="alert-banner" aria-live="polite" style="display:none"></div>
 
@@ -143,10 +143,10 @@
     <p class="footnote">
       The ring around each value shows where the reading sits in its full sensor range, colored on
       the same good / warning / critical scale as the flood-risk badges below; the line traces the
-      last ~30 readings. These four sensors (pH, TDS, thermistor, ultrasonic) are individually
-      wired and verified working — see <code>hardware/HARDWARE_LOG.md</code>. This panel will
-      connect to live Firebase readings automatically once the full hardware rebuild is
-      reintegrated; no changes to this page will be needed then.
+      last ~30 readings. Live from Firebase (<code>/sensor/*</code>), polled every few seconds — see
+      <code>hardware/AquaGuard_v2/</code> for the firmware that publishes it. pH shows
+      "NOT CALIBRATED" until the probe has been calibrated at least once — see the
+      <a href="ph-calibration.html">pH calibration page</a>.
     </p>
   </section>
 
@@ -154,7 +154,6 @@
   <section class="panel" aria-label="Pump control">
     <div class="panel-header-row">
       <h2>Pump control</h2>
-      <span class="demo-badge" title="Buttons only change on-screen state right now — not wired to the real relay. See hardware/HARDWARE_LOG.md: Step 5 (relay) is built but not yet reintegrated with WiFi/Firebase.">SIMULATED — NOT WIRED YET</span>
     </div>
 
     <div class="grid-2">
@@ -200,11 +199,10 @@
     </div>
 
     <p class="footnote">
-      These buttons write nothing to Firebase yet — they're deliberately local-only until the
-      hardware rebuild is fully reintegrated (relay wiring is built and tested standalone, see
-      <code>hardware/rebuild/05_relay_pumps/</code>, but not yet connected to WiFi/Firebase). Once
-      it is, this section switches to real <code>/pumps/pump1</code> / <code>/pumps/pump2</code>
-      Firebase writes — the same paths the ESP32 sketch already reads.
+      Writes to <code>/pumps/pump1</code> / <code>/pumps/pump2</code> in Firebase — the same paths
+      <code>hardware/AquaGuard_v2/AquaGuard_v2.ino</code>'s <code>controlPumps()</code> reads and
+      drives the relay from. Chips reflect the real state reported back by Firebase, not just what
+      was last clicked here.
     </p>
   </section>
 

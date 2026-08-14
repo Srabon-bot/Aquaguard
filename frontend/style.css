@@ -310,10 +310,13 @@ code {
 .stat-tile {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
   padding: 18px;
 }
+.stat-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .stat-label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+.tile-chip { font-size: 0.66rem; padding: 3px 8px; flex-shrink: 0; }
+
 .stat-value {
   font-size: 1.9rem;
   font-weight: 700;
@@ -321,6 +324,74 @@ code {
   color: var(--text-primary);
 }
 .stat-sub { font-size: 0.76rem; color: var(--text-muted); }
+
+/* Gauge ring — conic-gradient arc showing the reading's position in its full
+   sensor range, no library. Color reuses the fixed status palette so a ring
+   always means the same thing as the risk chips elsewhere on the page.
+   Mirrors frontend-glass/style.css's version, swapped to this theme's own
+   inset-shadow "pressed into the surface" idiom instead of a glass fill. */
+.stat-tile-mid { display: flex; align-items: center; gap: 14px; }
+
+.gauge-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: conic-gradient(from -90deg, var(--gauge-color, var(--accent)) calc(var(--gauge-pct, 0) * 1%), var(--bg) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.4s ease;
+}
+.gauge-ring::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+}
+.gauge-ring .stat-value {
+  position: relative;
+  z-index: 1;
+  font-size: 1.02rem;
+}
+
+.stat-tile-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+
+/* Sparkline — plain inline SVG polyline, last ~30 readings, no charting
+   library. */
+.sparkline { width: 100%; height: 26px; display: block; }
+.sparkline polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---------------------------- Alert banner ---------------------------- */
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.alert-banner.warning {
+  color: var(--status-warning);
+  background: var(--status-warning-bg);
+}
+.alert-banner.critical {
+  color: var(--status-critical);
+  background: var(--status-critical-bg);
+}
 
 /* ---------------------------- Pump control ---------------------------- */
 

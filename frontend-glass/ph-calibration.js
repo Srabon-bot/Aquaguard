@@ -12,7 +12,7 @@
 // hardware/FIREBASE_SETUP.md) — safe to fill in directly here.
 // ============================================================================
 
-const FIREBASE_BASE_URL = "https://YOUR_PROJECT-default-rtdb.firebaseio.com"; // <-- fill in, see hardware/FIREBASE_SETUP.md
+const FIREBASE_BASE_URL = "https://aquasheild-2e2ca-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 const POLL_INTERVAL_MS = 2000;
 

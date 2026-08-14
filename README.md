@@ -22,7 +22,7 @@ nothing here is oversold.
 | `frontend-glass/` | The dashboard (glassmorphism look) — **recommended, most up to date version** |
 | `frontend/` | The same dashboard, neumorphic look — kept in sync with `frontend-glass/` feature-for-feature |
 | `hardware/` | The ESP32 + sensors + pumps rebuild — wiring guides, per-sensor test sketches, progress log |
-| `reports/` | One rigorous PDF report per model (methodology, literature comparison, results, limitations) |
+| `reports/` | One rigorous PDF report per model (methodology, literature comparison, results, limitations), plus `reports/project-report/` — one whole-project report covering the system end to end |
 | `backend/` | The training pipeline that produced the models bundled inside `packages/*/models/` |
 | `DECISIONS.md` | Every significant design decision made on this project, why, and what it costs — written for a pre-defense walkthrough |
 | `MODEL_BUILD_PLAN.md` | The full chronological build log — the detailed "how we got here," session by session |
@@ -106,6 +106,10 @@ Written plainly, not to oversell what's finished:
 
 ## For a technical deep-dive / defense
 
+- **`reports/project-report/AquaGuard_Project_Report.pdf`** (also `manuals/6_Project_Report.pdf`) —
+  the single in-depth report covering the whole system: architecture, each model's real measured
+  results, the IoT hardware build, cloud/dashboard integration, key engineering decisions, and an
+  honest current-status checklist. Start here for a full-project read.
 - **`reports/`** — one PDF per model (`flood-risk-classifier/`, `discharge-forecaster/`,
   `flood-susceptibility/`), each covering literature review, methodology, results vs. published
   benchmarks, limitations, and reproducibility steps. `reports/legacy/` holds the original combined

@@ -11,6 +11,13 @@ Usage:
 
 Re-run any time a source .md file changes -- this always regenerates from the current
 Markdown, never hand-edited after the fact.
+
+Known cosmetic quirk (confirmed, not worth chasing further): PyMuPDF's Story engine
+occasionally paints a faint light-grey bar under a wrapped line or trailing blank
+space near a page break -- most visible on documents with tables and long
+bullet lists. Doesn't obscure any text and no fix was found that didn't
+introduce a worse regression elsewhere; noted here so it isn't mistaken for a
+new bug on a future PDF from this script.
 """
 
 import argparse
@@ -79,6 +86,11 @@ blockquote {
 }
 li { margin: 3px 0; }
 hr { border: none; border-top: 1px solid #cfd8dc; margin: 18px 0; }
+/* Fixed pt width, not 100% -- PyMuPDF's Story engine doesn't reliably resolve
+   percentage widths on <img> (confirmed by isolated testing: 100% rendered the
+   image at native/tiny pixel size instead of scaling to the content area).
+   480pt matches the ~482pt content width left by the @page 2cm margins on A4. */
+img { width: 480pt; margin: 10px 0; }
 """
 
 
@@ -113,10 +125,26 @@ def convert(md_path: Path, pdf_path: Path, title: str | None) -> int:
     body_html = markdown.markdown(
         text, extensions=["tables", "fenced_code", "sane_lists", "toc"]
     )
+    # Force a page break immediately before every image. Without this, an image
+    # that lands with less vertical space left on the current page than its
+    # rendered height needs gets silently squashed down to fit that leftover
+    # space instead of flowing onto the next page (confirmed by isolated
+    # bisection: the exact same <img> renders at full size at the top of a page
+    # and shrinks to a thumbnail lower down one) -- a real PyMuPDF Story layout
+    # quirk, not a sizing mistake in this file's CSS.
+    body_html = body_html.replace(
+        "<img", '<div style="page-break-before: always;"></div><img'
+    )
     doc_title = title or md_path.stem.replace("_", " ")
     html = f"<html><head><style>{CSS}</style></head><body>{body_html}</body></html>"
 
-    story = pymupdf.Story(html=html)
+    # archive= is required for <img> tags with relative paths (e.g. "assets/foo.png")
+    # to resolve at all -- without it, Story silently drops the image instead of
+    # raising, which only shows up as a missing picture in the rendered PDF
+    # (confirmed by isolated testing, not assumed). Rooted at the source .md file's
+    # own directory so image paths in the markdown are relative to it, not to
+    # whatever the caller's current working directory happens to be.
+    story = pymupdf.Story(html=html, archive=pymupdf.Archive(str(md_path.parent)))
     writer = pymupdf.DocumentWriter(str(pdf_path))
     mediabox = pymupdf.paper_rect("a4")
     where = mediabox + (0, 0, 0, 0)  # CSS @page margin handles the inset

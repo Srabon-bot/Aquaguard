@@ -1,0 +1,30 @@
+# --- API serving (app/) ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+httpx==0.27.2
+pydantic==2.9.2
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+joblib==1.4.2          # unpickles trained models -- lightgbm below must also be
+                        # installed even though app/ code never imports it directly,
+                        # since joblib.load() needs the class available to unpickle
+scikit-learn==1.5.2     # used by train/train_model.py's metrics; kept here too since
+                        # app/models/risk_model.py's placeholder model also needs it
+                        # to unpickle -- superseded by FloodGBMModel as of 2026-08-09
+                        # (DECISIONS.md SS19) but risk_model.py is kept for rollback
+lightgbm==4.7.0
+numpy==1.26.4
+pandas==2.2.3
+pyarrow==25.0.0         # parquet engine -- build_dataset.py/build_features.py/
+                        # train_model.py all read/write parquet; pandas silently
+                        # requires this as a separate package, missing it breaks
+                        # every training-pipeline script with a confusing error
+
+# --- Training pipeline only (train/) ---
+requests==2.34.2        # every ingest_*.py script's HTTP client
+shap==0.49.1            # SHAP feature-importance in train_model.py (DECISIONS.md SS10)
+pyshp==3.1.6            # reads the DFO shapefile archive in ingest_dfo_floods.py
+
+# --- Optional, only if pursuing the Google Earth Engine / MODIS Global Flood
+#     Database extension (DECISIONS.md open items -- deferred, not required) ---
+# earthengine-api==1.7.38

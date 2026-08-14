@@ -1,0 +1,1 @@
+export PIP_CACHE_DIR=/d/ClaudeData/pip-cache

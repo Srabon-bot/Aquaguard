@@ -1,0 +1,26 @@
+{
+  "24h": {
+    "ece_raw": 0.2479,
+    "ece_calibrated": 0.0164,
+    "log_loss_raw": 0.4873,
+    "log_loss_calibrated": 0.1373,
+    "brier_raw": 0.16624382491608047,
+    "brier_calibrated": 0.0385018759642239
+  },
+  "48h": {
+    "ece_raw": 0.2361,
+    "ece_calibrated": 0.0273,
+    "log_loss_raw": 0.4863,
+    "log_loss_calibrated": 0.1782,
+    "brier_raw": 0.16708659023233693,
+    "brier_calibrated": 0.051449996400077753
+  },
+  "72h": {
+    "ece_raw": 0.2346,
+    "ece_calibrated": 0.0394,
+    "log_loss_raw": 0.4996,
+    "log_loss_calibrated": 0.2547,
+    "brier_raw": 0.1726549202765006,
+    "brier_calibrated": 0.06600046977416071
+  }
+}

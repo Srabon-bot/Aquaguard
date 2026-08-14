@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaGuard — Pond Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">🌊</span>
+    <div>
+      <h1>AquaGuard</h1>
+      <p class="tagline">IoT pond management + regional flood early-warning</p>
+    </div>
+  </div>
+  <button id="themeToggle" class="neu-btn icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+  </button>
+</header>
+
+<main>
+
+  <!-- ===================== Location bar ===================== -->
+  <section class="panel location-bar" aria-label="Location">
+    <div class="neu-flat location-row">
+      <label for="stationSelect" class="field-label">Station / district</label>
+      <select id="stationSelect" class="neu-input">
+        <option value="">Loading stations…</option>
+      </select>
+      <button id="geoBtn" class="neu-btn">📍 Use my location</button>
+      <span id="locationStatus" class="location-status">Choose a station or use your location to begin.</span>
+    </div>
+  </section>
+
+  <div class="grid-2">
+
+    <!-- ===================== Weather ===================== -->
+    <section class="panel neu-raised" aria-label="Current weather">
+      <h2>Current weather</h2>
+      <div id="weatherBody" class="empty-state">
+        Select a location above to load current weather.
+      </div>
+    </section>
+
+    <!-- ===================== Tank state ===================== -->
+    <section class="panel neu-raised" aria-label="Tank state">
+      <div class="panel-header-row">
+        <h2>Tank state</h2>
+        <span class="demo-badge" title="Placeholder values — will show real readings once the hardware rebuild finishes full reintegration (see hardware/HARDWARE_LOG.md)">DEMO DATA</span>
+      </div>
+      <div class="tank-visual-wrap">
+        <svg id="tankSvg" viewBox="0 0 120 160" class="tank-svg" aria-hidden="true">
+          <rect x="4" y="4" width="112" height="152" rx="10" class="tank-outline"/>
+          <clipPath id="tankClip">
+            <rect x="8" y="8" width="104" height="144" rx="7"/>
+          </clipPath>
+          <rect id="tankWater" x="8" y="80" width="104" height="72" clip-path="url(#tankClip)" class="tank-water"/>
+        </svg>
+        <div class="tank-readout">
+          <span id="tankLevelPct" class="tank-level-value">—%</span>
+          <span class="tank-level-caption">estimated fill</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== Sensor tiles ===================== -->
+  <section class="panel" aria-label="Live sensor readings">
+    <div class="panel-header-row">
+      <h2>Sensor readings</h2>
+      <span class="demo-badge" title="Placeholder values — will show real readings once the hardware rebuild finishes full reintegration (see hardware/HARDWARE_LOG.md)">DEMO DATA</span>
+    </div>
+    <div id="sensorAlertBanner" class="alert-banner" aria-live="polite" style="display:none"></div>
+
+    <div class="tile-grid">
+      <div class="stat-tile neu-raised" data-sensor="ph">
+        <div class="stat-tile-top">
+          <span class="stat-label">pH</span>
+          <span id="chip-ph" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-ph">
+            <span id="tile-ph" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">safe range 6.5 – 8.5</span>
+            <svg id="spark-ph" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stat-tile neu-raised" data-sensor="tds">
+        <div class="stat-tile-top">
+          <span class="stat-label">Water quality (TDS)</span>
+          <span id="chip-tds" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-tds">
+            <span id="tile-tds" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">ppm · safe under 500</span>
+            <svg id="spark-tds" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stat-tile neu-raised" data-sensor="temp">
+        <div class="stat-tile-top">
+          <span class="stat-label">Temperature</span>
+          <span id="chip-temp" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-temp">
+            <span id="tile-temp" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">°C · comfortable 20 – 30</span>
+            <svg id="spark-temp" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stat-tile neu-raised" data-sensor="level">
+        <div class="stat-tile-top">
+          <span class="stat-label">Water level</span>
+          <span id="chip-level" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-level">
+            <span id="tile-level" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">cm from sensor · fill depth</span>
+            <svg id="spark-level" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="footnote">
+      The ring around each value shows where the reading sits in its full sensor range, colored on
+      the same good / warning / critical scale as the flood-risk badges below; the line traces the
+      last ~30 readings. These four sensors (pH, TDS, thermistor, ultrasonic) are individually
+      wired and verified working — see <code>hardware/HARDWARE_LOG.md</code>. This panel will
+      connect to live Firebase readings automatically once the full hardware rebuild is
+      reintegrated; no changes to this page will be needed then.
+    </p>
+  </section>
+
+  <!-- ===================== Pump control ===================== -->
+  <section class="panel" aria-label="Pump control">
+    <div class="panel-header-row">
+      <h2>Pump control</h2>
+      <span class="demo-badge" title="Buttons only change on-screen state right now — not wired to the real relay. See hardware/HARDWARE_LOG.md: Step 5 (relay) is built but not yet reintegrated with WiFi/Firebase.">SIMULATED — NOT WIRED YET</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="pump-card neu-raised">
+        <div class="pump-card-head">
+          <h3>Pump 1 — drain</h3>
+          <span id="pump1Status" class="status-chip muted"><span class="status-dot"></span>OFF</span>
+        </div>
+        <button id="pump1Toggle" class="neu-btn" data-pump="1" aria-pressed="false">Turn ON</button>
+      </div>
+
+      <div class="pump-card neu-raised">
+        <div class="pump-card-head">
+          <h3>Pump 2 — refill</h3>
+          <span id="pump2Status" class="status-chip muted"><span class="status-dot"></span>OFF</span>
+        </div>
+        <button id="pump2Toggle" class="neu-btn" data-pump="2" aria-pressed="false">Turn ON</button>
+      </div>
+    </div>
+
+    <div class="neu-flat water-cycle">
+      <h3>Water cycle</h3>
+      <p class="model-desc">Drain, then refill, automatically — for the exact timings you'd normally do by hand.</p>
+
+      <div class="cycle-inputs">
+        <label class="field-label" for="drainSeconds">Drain duration (sec)
+          <input id="drainSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="30">
+        </label>
+        <label class="field-label" for="refillSeconds">Refill duration (sec)
+          <input id="refillSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="30">
+        </label>
+      </div>
+
+      <div class="cycle-controls">
+        <button id="startCycle" class="neu-btn primary">▶ Start water cycle</button>
+        <button id="cancelCycle" class="neu-btn" style="display:none">■ Cancel</button>
+      </div>
+
+      <div class="cycle-progress-wrap" style="display:none" id="cycleProgressWrap">
+        <div class="cycle-progress-track"><div id="cycleProgressBar" class="cycle-progress-bar"></div></div>
+      </div>
+      <p id="cycleStatus" class="cycle-status">Idle.</p>
+    </div>
+
+    <p class="footnote">
+      These buttons write nothing to Firebase yet — they're deliberately local-only until the
+      hardware rebuild is fully reintegrated (relay wiring is built and tested standalone, see
+      <code>hardware/rebuild/05_relay_pumps/</code>, but not yet connected to WiFi/Firebase). Once
+      it is, this section switches to real <code>/pumps/pump1</code> / <code>/pumps/pump2</code>
+      Firebase writes — the same paths the ESP32 sketch already reads.
+    </p>
+  </section>
+
+  <!-- ===================== Models ===================== -->
+  <section class="panel" aria-label="Prediction models">
+    <h2>Regional forecast models</h2>
+    <p class="section-intro">
+      Three independent models, each trained on real historical flood data for 30 Bangladesh river
+      gauge stations. Each calls its own local service — start them first (see
+      <code>frontend/README.md</code>).
+    </p>
+
+    <div class="grid-3">
+      <!-- Flood risk classifier -->
+      <div class="model-card neu-raised">
+        <h3>Flood risk classifier</h3>
+        <p class="model-desc">Flood / no-flood risk at 24h, 48h, and 72h ahead.</p>
+        <button id="runClassifier" class="neu-btn primary" disabled>Get flood risk</button>
+        <div id="classifierResult" class="model-result"></div>
+      </div>
+
+      <!-- Discharge forecaster -->
+      <div class="model-card neu-raised">
+        <h3>River discharge forecaster</h3>
+        <p class="model-desc">Predicted river discharge (m³/s) at 24h, 48h, and 72h ahead.</p>
+        <button id="runDischarge" class="neu-btn primary" disabled>Get discharge forecast</button>
+        <div id="dischargeResult" class="model-result"></div>
+      </div>
+
+      <!-- Flood susceptibility -->
+      <div class="model-card neu-raised">
+        <h3>Flood susceptibility</h3>
+        <p class="model-desc">How flood-prone this ground is by nature (terrain, not weather) — static, no forecast horizon.</p>
+        <button id="runSusceptibility" class="neu-btn primary" disabled>Get susceptibility</button>
+        <div id="susceptibilityResult" class="model-result"></div>
+      </div>
+    </div>
+
+    <div id="combinedRiskWrap" class="neu-flat combined-risk" style="display:none">
+      <h3>Pipeline result</h3>
+      <p class="model-desc">
+        All 3 models feed into one answer: the discharge forecaster's own prediction is a live input
+        to the flood-risk classifier, whose output is then weighted by this ground's susceptibility.
+        Run the flood risk and susceptibility models above for this to appear.
+      </p>
+      <div id="combinedRiskResult" class="model-result"></div>
+    </div>
+  </section>
+
+  <!-- ===================== Suggested features ===================== -->
+  <section class="panel neu-flat" aria-label="Suggested additions">
+    <h2>Suggested additions</h2>
+    <p class="section-intro">Not built yet — ideas for where this dashboard/project could go next.</p>
+    <ul class="idea-list">
+      <li><strong>Alert thresholds & notifications.</strong> Push/SMS/WhatsApp alert when a sensor crosses a safe-range bound or the flood model crosses "high" — many rural farmers don't have always-on smartphone data, so SMS (via a gateway like Twilio or a local aggregator) reaches further than a push notification.</li>
+      <li><strong>Historical trend charts.</strong> Once Firebase is populated for real, line charts per sensor (last 24h/7d) sit naturally next to the current stat tiles — the dataviz groundwork in this page's CSS already supports it.</li>
+      <li><strong>Combined-condition trigger for the pumps.</strong> Instead of the ultrasonic sensor or the flood model acting alone, trigger the water-exchange motors only when both agree conditions warrant it — discussed in <code>MODEL_BUILD_PLAN.md</code> but not built.</li>
+      <li><strong>Dissolved oxygen sensor.</strong> The single most consistently-cited critical water-quality parameter in aquaculture research that this sensor suite currently lacks — flagged in <code>PROJECT_FEATURE_IDEAS.md</code>, not yet acted on.</li>
+      <li><strong>Station-relative discharge anomaly score.</strong> The discharge forecaster currently returns a raw m³/s number that isn't directly comparable across rivers of very different size — converting to a percentile/z-score against that station's own history would make the number meaningful at a glance on this dashboard.</li>
+      <li><strong>Multi-tank / multi-pond support.</strong> Right now the layout assumes one tank — a real deployment (or a more ambitious capstone demo) might manage several, each with its own card.</li>
+      <li><strong>Exportable report.</strong> A "download PDF" of the current dashboard snapshot — sensor readings, weather, both model outputs — useful for a capstone defense appendix or a farmer's own records.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="page-footer">
+  <p>AquaGuard — final-year IoT capstone. Flood model: <code>backend/</code> · Hardware: <code>hardware/</code>.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

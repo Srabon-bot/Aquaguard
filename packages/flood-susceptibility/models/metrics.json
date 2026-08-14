@@ -1,0 +1,98 @@
+{
+  "winner": "random_forest",
+  "cv_comparison": {
+    "lightgbm": {
+      "cv_folds": [
+        {
+          "roc_auc": 0.8561950257810131,
+          "pr_auc": 0.7078096391693292,
+          "n": 241,
+          "positive_rate": 0.34854771784232363,
+          "fold": 0
+        },
+        {
+          "roc_auc": 0.9082685406698564,
+          "pr_auc": 0.7916059307386255,
+          "n": 273,
+          "positive_rate": 0.23443223443223443,
+          "fold": 1
+        },
+        {
+          "roc_auc": 0.8259154929577465,
+          "pr_auc": 0.527478257285063,
+          "n": 271,
+          "positive_rate": 0.26199261992619927,
+          "fold": 2
+        },
+        {
+          "roc_auc": 0.8558075772681955,
+          "pr_auc": 0.44537936574589754,
+          "n": 270,
+          "positive_rate": 0.1259259259259259,
+          "fold": 3
+        }
+      ],
+      "cv_mean_roc_auc": 0.8615466591692028,
+      "cv_mean_pr_auc": 0.6180682982347288
+    },
+    "random_forest": {
+      "cv_folds": [
+        {
+          "roc_auc": 0.8748104337276312,
+          "pr_auc": 0.7199762045741374,
+          "n": 241,
+          "positive_rate": 0.34854771784232363,
+          "fold": 0
+        },
+        {
+          "roc_auc": 0.9220992822966507,
+          "pr_auc": 0.7431212500349291,
+          "n": 273,
+          "positive_rate": 0.23443223443223443,
+          "fold": 1
+        },
+        {
+          "roc_auc": 0.8590140845070422,
+          "pr_auc": 0.590833387491487,
+          "n": 271,
+          "positive_rate": 0.26199261992619927,
+          "fold": 2
+        },
+        {
+          "roc_auc": 0.8964356929212363,
+          "pr_auc": 0.5102028064877622,
+          "n": 270,
+          "positive_rate": 0.1259259259259259,
+          "fold": 3
+        }
+      ],
+      "cv_mean_roc_auc": 0.8880898733631402,
+      "cv_mean_pr_auc": 0.6410334121470789
+    }
+  },
+  "held_out_test": {
+    "roc_auc": 0.9081300469285081,
+    "pr_auc": 0.784517683604747,
+    "n": 326,
+    "positive_rate": 0.3343558282208589
+  },
+  "held_out_test_stations": [
+    "CH01",
+    "CO01",
+    "DH01",
+    "GO02",
+    "KU01",
+    "SW267",
+    "TE02"
+  ],
+  "feature_importance_shap": {
+    "landcover_class": 0.1424,
+    "slope_deg": 0.1226,
+    "drainage_density_km_per_km2": 0.0325,
+    "elevation_m": 0.0206,
+    "dist_to_river_m": 0.0144,
+    "basin": 0.0105
+  },
+  "train_n": 1055,
+  "test_n": 326
+}

@@ -1,0 +1,35 @@
+# Secrets -- never commit. Real credentials live in .env (NASA Earthdata
+# login for the MCDWD/GFMS pipeline); .env.example stays tracked as the
+# template.
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Large generated/downloaded data -- reproducible via train/ingest_*.py and
+# train/build_dataset.py / build_features.py, not source, not meant to live
+# in git history (978MB backend/data_raw + 530MB backend/data as of
+# 2026-08-09).
+backend/data_raw/
+backend/data/
+
+# Trained model artifacts -- currently small (~2MB) but binary and
+# regeneratable via train/train_model.py; excluded for convention/repo
+# hygiene. If you'd rather ship the trained model IN the repo (e.g. so a
+# fresh clone has a working API without retraining), remove this line --
+# nothing else depends on it being excluded.
+backend/models/
+
+# Log files from background ingest/backfill runs
+*.log
+*.err.log
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db

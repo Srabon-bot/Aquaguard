@@ -25,6 +25,8 @@ let stationsCache = [];
 // never gets shown against a new one.
 let latestClassifierProba24h = null;
 let latestSusceptibilityScore = null;
+let latestSusceptibilityBand = null;
+let latestDischargeTrend24h = null; // "rising" | "falling" | "steady" | "unknown" | null
 
 // ---------------------------------------------------------------------------
 // Theme toggle
@@ -117,9 +119,12 @@ function setLocation(loc) {
   document.getElementById("runClassifier").disabled = false;
   document.getElementById("runDischarge").disabled = false;
   document.getElementById("runSusceptibility").disabled = false;
+  document.getElementById("runAllModels").disabled = false;
   // New location -- any previously-combined score no longer applies to it.
   latestClassifierProba24h = null;
   latestSusceptibilityScore = null;
+  latestSusceptibilityBand = null;
+  latestDischargeTrend24h = null;
   document.getElementById("combinedRiskWrap").style.display = "none";
   loadWeather(loc.lat, loc.lon);
 }
@@ -172,7 +177,7 @@ async function loadWeather(lat, lon) {
 const RISK_STATUS = { low: "good", moderate: "warning", high: "critical" };
 const RISK_ICON = { low: "✓", moderate: "!", high: "▲" };
 
-document.getElementById("runClassifier").addEventListener("click", async () => {
+async function runClassifierAnalysis() {
   if (!currentLocation) return;
   const out = document.getElementById("classifierResult");
   out.innerHTML = '<div class="empty-state"><span class="spinner"></span>Running classifier…</div>';
@@ -206,14 +211,16 @@ document.getElementById("runClassifier").addEventListener("click", async () => {
   } catch (e) {
     out.innerHTML = modelErrorHtml(e, "flood-risk-classifier", 8000);
   }
-});
+}
+
+document.getElementById("runClassifier").addEventListener("click", runClassifierAnalysis);
 
 // ---------------------------------------------------------------------------
 // Discharge forecaster
 // ---------------------------------------------------------------------------
 const TREND_ARROW = { rising: "↑", falling: "↓", steady: "→", unknown: "?" };
 
-document.getElementById("runDischarge").addEventListener("click", async () => {
+async function runDischargeAnalysis() {
   if (!currentLocation) return;
   const out = document.getElementById("dischargeResult");
   out.innerHTML = '<div class="empty-state"><span class="spinner"></span>Running forecaster…</div>';
@@ -235,10 +242,15 @@ document.getElementById("runDischarge").addEventListener("click", async () => {
       </p>
       ${rows}
       <p class="honesty-note">${escapeHtml(data.note)}</p>`;
+    const f24h = data.forecasts.find(f => f.horizon === "24h");
+    latestDischargeTrend24h = f24h ? f24h.trend : null;
+    maybeRenderCombinedRisk();
   } catch (e) {
     out.innerHTML = modelErrorHtml(e, "discharge-forecaster", 8001);
   }
-});
+}
+
+document.getElementById("runDischarge").addEventListener("click", runDischargeAnalysis);
 
 // ---------------------------------------------------------------------------
 // Flood susceptibility -- static terrain-based, no forecast horizon. See
@@ -248,7 +260,7 @@ document.getElementById("runDischarge").addEventListener("click", async () => {
 const SUSCEPTIBILITY_BAND_STATUS = { low: "good", moderate: "warning", high: "serious", very_high: "critical" };
 const SUSCEPTIBILITY_BAND_ICON = { low: "✓", moderate: "!", high: "▲", very_high: "▲" };
 
-document.getElementById("runSusceptibility").addEventListener("click", async () => {
+async function runSusceptibilityAnalysis() {
   if (!currentLocation) return;
   const out = document.getElementById("susceptibilityResult");
   out.innerHTML = '<div class="empty-state"><span class="spinner"></span>Running susceptibility model…</div>';
@@ -270,18 +282,92 @@ document.getElementById("runSusceptibility").addEventListener("click", async () 
       ${factors ? `<p style="margin:8px 0 0;font-size:0.82rem;color:var(--text-muted)">Top factors: ${escapeHtml(factors)}</p>` : ""}
       <p class="honesty-note">${escapeHtml(data.honesty_note)}</p>`;
     latestSusceptibilityScore = data.susceptibility_score;
+    latestSusceptibilityBand = data.susceptibility_band;
     maybeRenderCombinedRisk();
   } catch (e) {
     out.innerHTML = modelErrorHtml(e, "flood-susceptibility", 8002);
   }
+}
+
+document.getElementById("runSusceptibility").addEventListener("click", runSusceptibilityAnalysis);
+
+// ---------------------------------------------------------------------------
+// Run all 3 models together (one-button analysis) -- so the full pipeline
+// summary below always completes without needing 3 separate manual clicks.
+// The 3 analysis functions are independent (each hits its own local
+// service), so they run in parallel; each already updates its own
+// latest*/DOM state and calls maybeRenderCombinedRisk() on completion, so
+// whichever finishes last naturally renders the complete summary.
+// ---------------------------------------------------------------------------
+document.getElementById("runAllModels").addEventListener("click", async () => {
+  if (!currentLocation) return;
+  const btn = document.getElementById("runAllModels");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Running all 3 models…";
+  try {
+    await Promise.all([
+      runClassifierAnalysis(),
+      runDischargeAnalysis(),
+      runSusceptibilityAnalysis(),
+    ]);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 });
 
 // ---------------------------------------------------------------------------
-// Combined risk -- transparent formula, not a stacked meta-model (see
-// packages/flood-susceptibility/README.md "Combining with the other two
-// models"). Only rendered once both the classifier's 24h probability AND
-// the susceptibility score are available for the CURRENT location.
+// Pipeline result -- what all 3 models feed into.
+//
+// Deliberately NOT a single LOW/MODERATE/HIGH/SEVERE word: that collapses
+// three independent, genuinely different pieces of evidence into one
+// pre-judged label, hiding exactly the information a user would want to
+// weigh for themselves (e.g. "modest live risk, but on ground that rarely
+// floods" reads very differently than "high live risk on ground that
+// floods often" even if a single blended score happened to land the same).
+// Instead this states each fact plainly and lets the reader draw their own
+// conclusion -- see buildFactualSummary().
+//
+// The classifier's own 24h probability already has the discharge
+// forecaster's prediction baked in server-side (the "cascade" feature, see
+// packages/flood-risk-classifier/flood_model.py). The susceptibility score
+// is reported separately, not pre-multiplied into one number, for the same
+// reason -- see packages/flood-susceptibility/README.md "Combining with
+// the other two models" for the formula still shown as supplementary
+// detail below the summary, for anyone who wants the arithmetic.
 // ---------------------------------------------------------------------------
+
+const DISCHARGE_TREND_PHRASE = {
+  rising: "is currently rising",
+  falling: "is currently falling",
+  steady: "is currently steady",
+};
+const SUSCEPTIBILITY_FREQUENCY = {
+  very_high: "very often",
+  high: "often",
+  moderate: "sometimes",
+  low: "rarely",
+};
+
+function buildFactualSummary() {
+  const probaPct = Math.round(latestClassifierProba24h * 100);
+  const sentence1 = `Based on current rainfall, soil moisture, and river discharge, the flood model ` +
+    `estimates a ${probaPct}% chance of flooding here within the next 24 hours.`;
+
+  const trendPhrase = DISCHARGE_TREND_PHRASE[latestDischargeTrend24h];
+  const sentence2 = trendPhrase
+    ? `River discharge ${trendPhrase}.`
+    : `River discharge trend is not available for this location.`;
+
+  const frequency = SUSCEPTIBILITY_FREQUENCY[latestSusceptibilityBand] ?? "sometimes";
+  const suscPct = Math.round(latestSusceptibilityScore * 100);
+  const sentence3 = `This location's terrain has ${frequency} been associated with flooding in the ` +
+    `historical satellite record (susceptibility score ${suscPct}%).`;
+
+  return [sentence1, sentence2, sentence3];
+}
+
 function maybeRenderCombinedRisk() {
   const wrap = document.getElementById("combinedRiskWrap");
   if (latestClassifierProba24h == null || latestSusceptibilityScore == null) {
@@ -290,13 +376,17 @@ function maybeRenderCombinedRisk() {
   }
   const modulator = 0.5 + 0.5 * latestSusceptibilityScore;
   const combined = Math.min(1, latestClassifierProba24h * modulator);
+  const sentences = buildFactualSummary();
+
   const out = document.getElementById("combinedRiskResult");
   out.innerHTML = `
+    <p class="pipeline-summary">${sentences.map(escapeHtml).join(" ")}</p>
     <div class="combined-score-row">
       <span class="combined-score-value">${(combined * 100).toFixed(0)}%</span>
       <span class="combined-score-detail">
-        ${(latestClassifierProba24h * 100).toFixed(0)}% (24h classifier) ×
-        ${modulator.toFixed(2)} (susceptibility modulator, from a ${(latestSusceptibilityScore * 100).toFixed(0)}% terrain score)
+        combined estimate: ${(latestClassifierProba24h * 100).toFixed(0)}% classifier (24h, already informed
+        by the discharge forecast) × ${modulator.toFixed(2)} susceptibility modulator
+        (${(latestSusceptibilityScore * 100).toFixed(0)}% terrain score) — shown for reference, not as a verdict
       </span>
     </div>`;
   wrap.style.display = "block";

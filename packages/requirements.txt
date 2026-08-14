@@ -1,0 +1,17 @@
+# Consolidated dependencies for all 3 model services (flood-risk-classifier,
+# discharge-forecaster, flood-susceptibility) -- one venv, one install, run all three.
+#
+# This is a union of each service's own requirements.txt, not a replacement for them --
+# each package folder keeps its own requirements.txt too, so any one of them still works
+# standalone if copied out on its own. Versions already matched exactly across all three
+# (verified), so there is nothing to reconcile here.
+
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+httpx==0.27.2
+pydantic==2.9.2
+joblib==1.4.2
+scikit-learn==1.5.2
+lightgbm==4.7.0
+numpy==1.26.4
+pandas==2.2.3

@@ -260,6 +260,16 @@ code {
 }
 
 .section-intro { margin-top: -4px; }
+
+.run-all-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 18px;
+}
+.run-all-btn { font-weight: 600; padding: 12px 22px; }
+.run-all-hint { font-size: 0.85rem; color: var(--text-muted); flex: 1 1 220px; }
 .footnote { font-size: 0.82rem; color: var(--text-muted); margin: 14px 2px 0; }
 
 /* ---------------------------- Location bar ---------------------------- */
@@ -543,18 +553,35 @@ code {
   border-radius: 6px;
   font-size: 0.85em;
 }
+/* Pipeline summary -- deliberately plain, no color-coded severity badge.
+   States the facts (classifier probability, discharge trend, terrain
+   susceptibility) so the reader draws their own conclusion, rather than a
+   single pre-judged LOW/MODERATE/HIGH/SEVERE word making that call for
+   them. See app.js buildFactualSummary() for the full reasoning. */
+.pipeline-summary {
+  font-size: 1rem;
+  color: var(--text-primary);
+  line-height: 1.55;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  margin-top: 10px;
+  background: var(--glass-fill-strong);
+  border: 1px solid var(--glass-border);
+}
+
 .combined-score-row {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 .combined-score-value {
-  font-size: 2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
 }
-.combined-score-detail { font-size: 0.82rem; color: var(--text-muted); }
+.combined-score-detail { font-size: 0.78rem; color: var(--text-muted); }
 
 /* ---------------------------- Ideas list ---------------------------- */
 

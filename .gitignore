@@ -33,3 +33,20 @@ backend/models/
 # OS/editor cruft
 .DS_Store
 Thumbs.db
+desktop.ini
+node_modules/
+
+# Claude Code's own local tool state (session locks, machine-local permission
+# cache) -- not project source, churns constantly, nothing here is meant to
+# be shared/synced across machines or contributors.
+.claude/
+
+# Local-only "everything in one folder" snapshot for manually copying the
+# project to another PC without git (see AquaGuard_Portable_Package/START_HERE.md).
+# Deliberately NOT committed: it's a full duplicate of packages/, frontend/,
+# frontend-glass/, and hardware/ that are already tracked above, plus the
+# same 3 PDFs already tracked under manuals/ -- committing it would roughly
+# double this repo's size for zero new content. A GitHub clone/ZIP download
+# of this repo already provides the same portability the folder was built
+# for; regenerate it locally any time (or just re-copy) if you want it again.
+AquaGuard_Portable_Package/

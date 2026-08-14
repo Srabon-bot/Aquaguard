@@ -170,6 +170,11 @@
       <code>frontend/README.md</code>).
     </p>
 
+    <div class="run-all-row">
+      <button id="runAllModels" class="neu-btn primary run-all-btn" disabled>▶ Run full analysis</button>
+      <span class="run-all-hint">Runs all 3 models together and builds the pipeline summary below — or run one at a time using the buttons in each card.</span>
+    </div>
+
     <div class="grid-3">
       <!-- Flood risk classifier -->
       <div class="model-card neu-raised">
@@ -197,11 +202,12 @@
     </div>
 
     <div id="combinedRiskWrap" class="neu-flat combined-risk" style="display:none">
-      <h3>Combined risk</h3>
+      <h3>Pipeline summary</h3>
       <p class="model-desc">
-        Flood-risk classifier's 24h probability, weighted by this ground's susceptibility:
-        <code>classifier × (0.5 + 0.5 × susceptibility)</code> — a transparent formula, not a
-        black-box meta-model. Run both models above for this to appear.
+        All 3 models feed into this: the discharge forecaster's own prediction is a live input to the
+        flood-risk classifier, and this panel states what each model actually found in plain terms —
+        not a single pre-judged verdict — so you can weigh the facts yourself. Run the flood risk and
+        susceptibility models above for this to appear.
       </p>
       <div id="combinedRiskResult" class="model-result"></div>
     </div>

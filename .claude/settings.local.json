@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(mkdir -p legacy)",
-      "Bash(mv Flood_Model_Report.pdf Report_Explained.md legacy/)"
-    ]
-  }
-}

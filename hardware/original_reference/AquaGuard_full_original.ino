@@ -10,17 +10,25 @@
 // room temperature. Apply the same fix used in
 // hardware/rebuild/03_thermistor/03_thermistor.ino before reintegrating this
 // sketch: swap to `seriesResistor * ((4095.0 - thermRaw) / thermRaw)`.
+//
+// REDACTED (2026-08-14): the real WiFi/Firebase credentials that were
+// hardcoded here (an old, now-retired Firebase project) were replaced with
+// placeholders below before this project went to a public GitHub repo -- fill
+// in your own values, never commit real ones. See hardware/FIREBASE_SETUP.md
+// for how to get a WIFI_SSID/PASSWORD and FIREBASE_HOST/AUTH for a new
+// project. Prefer a build flag / untracked local header over editing this
+// value in place, so a future commit can't accidentally re-expose it.
 
 #include <WiFi.h>
 #include <FirebaseESP32.h>
 #include <ESP32Servo.h>
 #include <math.h>
 
-#define WIFI_SSID     "REDMI Turbo 5 Max"
-#define WIFI_PASSWORD "zarektia"
+#define WIFI_SSID     "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 
-#define FIREBASE_HOST "aquaguard-iot-14188-default-rtdb.firebaseio.com"
-#define FIREBASE_AUTH "AIzaSyCYBHSRmkw3h3ajZQeOG5YDRQrvMELNGZ0"
+#define FIREBASE_HOST "YOUR_PROJECT-default-rtdb.firebaseio.com"
+#define FIREBASE_AUTH "YOUR_FIREBASE_DATABASE_SECRET"
 
 // Sensor Pins
 #define TRIG_PIN  5

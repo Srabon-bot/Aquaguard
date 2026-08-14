@@ -37,9 +37,16 @@
   --glass-fill: rgba(255, 255, 255, 0.78);
   --glass-fill-strong: rgba(255, 255, 255, 0.88);
   --glass-recessed: rgba(255, 255, 255, 0.60);
-  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-sheen: rgba(255, 255, 255, 0.35);
   --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.16);
-  --blur: 18px;
+  /* iPhone/macOS-style "Liquid Glass" reference: real Apple materials are
+     heavily blurred (so no sharp edge of whatever's behind ever shows
+     through) and are NOT the ultra-transparent 10-20% often associated with
+     the "glassmorphism" trend -- see the CSS-Tricks/Medium engineering
+     writeups on Liquid Glass. Bumped from 18px for a properly frosted look
+     with real depth, not a light haze. */
+  --blur: 36px;
 
   --text-primary: #10131a;
   --text-secondary: #3c4250;
@@ -78,7 +85,8 @@
     --glass-fill: rgba(15, 23, 42, 0.65);
     --glass-fill-strong: rgba(15, 23, 42, 0.80);
     --glass-recessed: rgba(0, 0, 0, 0.50);
-    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-border: rgba(255, 255, 255, 0.20);
+    --glass-sheen: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 
     --text-primary: #f5f7fa;
@@ -110,7 +118,8 @@
   --glass-fill: rgba(15, 23, 42, 0.65);
   --glass-fill-strong: rgba(15, 23, 42, 0.80);
   --glass-recessed: rgba(0, 0, 0, 0.50);
-  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.20);
+  --glass-sheen: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 
   --text-primary: #f5f7fa;
@@ -168,18 +177,26 @@ code {
 /* ---------------------------- Glass primitives ---------------------------- */
 
 .neu-raised {
-  background: var(--glass-fill);
-  backdrop-filter: blur(var(--blur)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  /* Two-property split (not a single `background` shorthand) so the sheen
+     gradient and the translucent fill color compose predictably: the sheen
+     paints on top, the page's gradient still shows through the fill's own
+     alpha underneath both. This "soft light catching the top edge" detail
+     is the other half of the iOS/macOS Liquid Glass look beyond just blur
+     -- a flat translucent fill alone reads as tinted plastic, not glass. */
+  background-color: var(--glass-fill);
+  background-image: linear-gradient(180deg, var(--glass-sheen) 0%, transparent 45%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
 }
 
 .neu-flat {
-  background: var(--glass-fill);
-  backdrop-filter: blur(calc(var(--blur) * 0.7)) saturate(150%);
-  -webkit-backdrop-filter: blur(calc(var(--blur) * 0.7)) saturate(150%);
+  background-color: var(--glass-fill);
+  background-image: linear-gradient(180deg, var(--glass-sheen) 0%, transparent 45%);
+  backdrop-filter: blur(calc(var(--blur) * 0.7)) saturate(165%);
+  -webkit-backdrop-filter: blur(calc(var(--blur) * 0.7)) saturate(165%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
@@ -247,11 +264,22 @@ code {
 
 .topbar {
   max-width: 1080px;
-  margin: 0 auto;
-  padding: 24px 20px 8px;
+  margin: 16px auto 0;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Was fully transparent -- floated directly on the raw gradient, which
+     failed contrast for .tagline (as low as 1.95:1) and marginally for the
+     h1 too. Same glass-fill backing + sheen as every panel elsewhere on
+     the page, for the same reason. */
+  background-color: var(--glass-fill);
+  background-image: linear-gradient(180deg, var(--glass-sheen) 0%, transparent 45%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
 }
 .brand { display: flex; align-items: center; gap: 14px; }
 .brand-mark { font-size: 2rem; }
@@ -621,11 +649,20 @@ code {
 
 .page-footer {
   max-width: 1080px;
-  margin: 0 auto;
-  padding: 8px 20px 40px;
+  margin: 8px auto 24px;
+  padding: 14px 20px;
   font-size: 0.8rem;
   color: var(--text-muted);
   text-align: center;
+  /* Was fully transparent -- sat directly on the raw gradient with no
+     backing, failing contrast (as low as 1.95:1). Same glass-fill backing
+     + sheen as .topbar and every panel elsewhere on the page. */
+  background-color: var(--glass-fill);
+  background-image: linear-gradient(180deg, var(--glass-sheen) 0%, transparent 45%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
 }
 
 /* ---------------------------- Loading ---------------------------- */

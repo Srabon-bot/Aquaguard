@@ -71,3 +71,63 @@ target — do not upload it until all 7 parts are individually confirmed.
   applying the thermistor formula fix during that merge. The intermittent upload boot-mode issue
   is still unresolved (workaround in use) — offer the driver-downgrade test or the EN/GND
   capacitor fix next time it comes up.
+
+### 2026-08-14 (Step 7 written: full reintegration + Firebase-driven pH calibration)
+
+User asked whether moving pH calibration out of a separate re-flashed sketch and into the main
+firmware, triggered from the dashboard instead of Serial, was a good idea (it is — real usability win,
+removes the "USB cable + Arduino IDE" requirement; doesn't remove needing to be physically at the pond
+to swap solutions). Confirmed the user always uses vinegar/baking soda specifically (not arbitrary
+buffer solutions), so the reference pH values are fixed constants, not a web input.
+
+**Built `hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino`** — the first real Step 7 artifact
+(previously "not started"). Built from `original_reference/AquaGuard_full_original.ino` with both
+already-known bugs actually fixed this time (not just commented): the thermistor formula swap, and
+the pH formula replaced with the real two-point calibration from `01_ph_sensor.ino` (loaded from flash
+via `Preferences` at boot) instead of the original's crude uncalibrated formula.
+
+**New feature — Firebase-driven pH calibration**: the exact same two-point math and NVS flash format
+(`Preferences` namespace `"phcal"`, keys `v_acid`/`v_base`/`ph_acid`/`ph_base`) already used by
+`ph_calibration_tool.ino`, but triggered over new `/phCalibration/*` Firebase paths (`liveVoltage`,
+`command`, `capturedAcidV`/`capturedBaseV`, `status`, `lastError`, `lastSavedAt`) instead of Serial
+commands — a non-blocking poll-based state machine (`handlePhCalibration()`), not a blocking loop, so
+it runs alongside the existing sensor/pump/servo logic without stalling it. Fixed to vinegar (pH 2.4)
+/ baking soda (pH 8.3) — `CAL_PH_ACID`/`CAL_PH_BASE` constants, not exposed as a web input. A
+calibration saved via this new path, the old Serial tool, or vice versa, are fully interchangeable —
+same flash keys, nothing duplicated.
+- **One real bug caught and fixed while writing this, not left in**: first draft called a fabricated
+  `Firebase.setTimestamp()` that doesn't exist in the `FirebaseESP32` library's actual API. Replaced
+  with the same `.sv`-server-value JSON trick the original sketch already proves works (used for
+  `/history`'s timestamp field) — a verified pattern from this exact codebase, not a guessed API.
+
+**New dashboard page**: `ph-calibration.html` + `ph-calibration.js` in both `frontend-glass/` and
+`frontend/` (byte-identical copies, matching those folders' existing convention), linked from the main
+dashboard's header (🧪 pH calibration). Plain Firebase REST calls (`fetch` GET/PUT), no SDK — same
+"no build step" approach as the rest of both frontends. Polls `/phCalibration` every 2s, shows live
+voltage + status + captured points, 4 action buttons (capture acid/base, save, clear) that write to
+`/phCalibration/command`. `FIREBASE_BASE_URL` is a placeholder constant until a real Firebase project
+exists (see `FIREBASE_SETUP.md`) — the page correctly detects this and disables all 4 action buttons
+with an explanatory message rather than sending requests to a fake URL; verified live in the browser
+(all 4 buttons confirmed disabled with the placeholder URL, then `renderStatus()` called directly with
+mock "both_captured" data to confirm the status panel and button-enabling logic both render correctly
+— can't test the real end-to-end flow without an actual ESP32 + live Firebase project yet).
+
+**New manual**: `hardware/PH_CALIBRATION_MANUAL.md` (what you need, step-by-step, troubleshooting),
+converted to `manuals/4_pH_Calibration_Manual.pdf` and synced to
+`AquaGuard_Portable_Package/manuals/` (two copies, per the user's request). Caught and fixed a real
+rendering defect while verifying: the 4 emoji used for button labels (🧪🧂💾🗑) rendered as blank gaps
+in the PDF (no glyph in PyMuPDF's fallback font — confirmed by rendering to PNG and inspecting, same
+verification pattern as every other PDF this project produces) — extended `scripts/md_to_pdf.py`'s
+existing `SYMBOL_FALLBACKS` table to drop them cleanly instead (also cut the file size from ~1MB to
+~220KB, apparently from avoiding an embedded emoji font).
+
+**Also updated**: `hardware/FIREBASE_SETUP.md`'s security rules JSON now includes the new
+`phCalibration` path (7 named paths total, was 6). `AquaGuard_Portable_Package/` (the local portable
+snapshot) and `manuals/` (the tracked-in-git copy) both re-synced with all of the above.
+
+- **Resume point**: `AquaGuard_v2.ino` is written and reviewed but **not yet flash-tested on real
+  hardware** — first real upload should be watched closely via Serial Monitor like every other rebuild
+  step (see that folder's README "Testing this step" section). The pH calibration page can't be
+  exercised end-to-end until a real Firebase project exists and its databaseURL is filled into
+  `ph-calibration.js` — same blocking dependency as the rest of the deferred hardware-integration
+  plan.

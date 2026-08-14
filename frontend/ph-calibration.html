@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaGuard — pH Calibration</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">🧪</span>
+    <div>
+      <h1>pH Calibration</h1>
+      <p class="tagline">Two-point calibration, done from any browser — no re-flashing the ESP32</p>
+    </div>
+  </div>
+  <a href="index.html" class="neu-btn">← Back to dashboard</a>
+</header>
+
+<main>
+
+  <!-- ===================== Setup notice ===================== -->
+  <section class="panel neu-flat" aria-label="Setup required">
+    <p class="model-desc">
+      This page talks directly to your Firebase Realtime Database — the same one the ESP32 firmware
+      (<code>hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino</code>) uses. Before this page
+      works, open <code>ph-calibration.js</code> and set <code>FIREBASE_BASE_URL</code> to your
+      project's databaseURL (see <code>hardware/FIREBASE_SETUP.md</code>) — it's a plain constant near
+      the top of the file, not a secret.
+    </p>
+  </section>
+
+  <!-- ===================== How this works ===================== -->
+  <section class="panel" aria-label="How this works">
+    <h2>How this works</h2>
+    <p class="section-intro">
+      Fixed to two kitchen reference solutions — always the same two, so there's nothing to type in
+      here:
+    </p>
+    <div class="grid-2">
+      <div class="model-card neu-raised">
+        <h3>🧪 Acid point</h3>
+        <p class="model-desc">Plain white vinegar, 5% acidity — reference pH <strong>2.4</strong>.</p>
+      </div>
+      <div class="model-card neu-raised">
+        <h3>🧂 Base point</h3>
+        <p class="model-desc">~1 tsp baking soda dissolved in 1 cup water — reference pH <strong>8.3</strong>.</p>
+      </div>
+    </div>
+    <ol class="idea-list" style="margin-top:14px">
+      <li>Rinse the probe, dip it in the <strong>vinegar</strong>. Watch the live voltage below settle
+        (stop drifting), then click <strong>Capture acid point</strong>.</li>
+      <li>Rinse the probe, dip it in the <strong>baking soda solution</strong>. Wait for it to settle,
+        then click <strong>Capture base point</strong>.</li>
+      <li>Click <strong>Save calibration</strong> — this writes to the ESP32's flash and takes effect
+        immediately, no reboot needed.</li>
+    </ol>
+  </section>
+
+  <!-- ===================== Live status ===================== -->
+  <section class="panel neu-raised" aria-label="Calibration status">
+    <h2>Live status</h2>
+    <div id="calStatusResult" class="model-result">
+      <div class="empty-state"><span class="spinner"></span>Connecting…</div>
+    </div>
+  </section>
+
+  <!-- ===================== Actions ===================== -->
+  <section class="panel" aria-label="Calibration actions">
+    <h2>Actions</h2>
+    <div class="grid-2">
+      <button id="captureAcidBtn" class="neu-btn primary" disabled>🧪 Capture acid point (vinegar)</button>
+      <button id="captureBaseBtn" class="neu-btn primary" disabled>🧂 Capture base point (baking soda)</button>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <button id="saveCalBtn" class="neu-btn primary" disabled>💾 Save calibration</button>
+      <button id="clearCalBtn" class="neu-btn" disabled>🗑 Clear saved calibration</button>
+    </div>
+    <p id="calActionMessage" class="honesty-note" style="margin-top:14px;display:none"></p>
+  </section>
+
+</main>
+
+<footer class="page-footer">
+  <p>AquaGuard — pH calibration page. Firmware: <code>hardware/rebuild/07_full_reintegration/</code>.</p>
+</footer>
+
+<script src="ph-calibration.js"></script>
+</body>
+</html>

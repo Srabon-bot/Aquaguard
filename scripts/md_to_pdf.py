@@ -91,6 +91,18 @@ SYMBOL_FALLBACKS = {
     "✅": "[done]",       # checkmark button
     "⏳": "[in progress]",  # hourglass
     "▶": ">",             # play/triangle
+    # These 4 render as fully blank gaps (not even a tofu box) rather than
+    # black boxes -- worse for a manual, since "Click ' Capture acid...'"
+    # reads as a typo, not an obviously-missing icon. Dropped entirely
+    # (including the space that normally follows them in this project's
+    # docs) rather than given a bracketed text stand-in like the 3 above --
+    # the button/action text alone is already self-explanatory, so a
+    # "[test tube]" tag would just add clutter. Order matters here: the
+    # "symbol+space" entries must be replaced before the bare-symbol
+    # fallback below, or the bare replacement runs first and leaves a
+    # stray double space.
+    "🧪 ": "", "🧂 ": "", "💾 ": "", "🗑 ": "",
+    "🧪": "", "🧂": "", "💾": "", "🗑": "",
 }
 
 

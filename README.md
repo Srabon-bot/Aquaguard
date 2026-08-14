@@ -90,6 +90,9 @@ Written plainly, not to oversell what's finished:
 - ⏳ **Live ESP32 → dashboard link + pump automation logic**: in progress. `hardware/FIREBASE_SETUP.md`
   is the first step (setting up the free database that will carry live sensor data and pump commands
   between the physical device and the dashboard).
+- ⏳ **pH calibration page** (`ph-calibration.html`, linked from the dashboard header): code and
+  firmware side (`hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino`) are written, but need a
+  real Firebase project (see above) and a real ESP32 flash before this actually works end to end.
 - ⏳ **Public hosting (Vercel)**: not yet deployed — the dashboard currently runs locally only (Steps
   1-2 above). The 3 model services are also local-only by design for now (a deliberate, documented
   choice — see `MODEL_BUILD_PLAN.md` — to keep hosting cost/complexity at zero rather than a gap).

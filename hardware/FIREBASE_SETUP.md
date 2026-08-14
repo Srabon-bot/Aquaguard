@@ -79,6 +79,10 @@ whole database) — matches this project's "open writes, but scoped, not wide op
     "servoTrigger": {
       ".read": true,
       ".write": true
+    },
+    "phCalibration": {
+      ".read": true,
+      ".write": true
     }
   }
 }
@@ -87,7 +91,7 @@ whole database) — matches this project's "open writes, but scoped, not wide op
 3. Click **Publish**.
 
 Anything *not* listed here (i.e. the database root, or any other top-level key someone might guess)
-stays denied by default — Firebase RTDB rules don't inherit permissively, only these 6 named paths
+stays denied by default — Firebase RTDB rules don't inherit permissively, only these 7 named paths
 are actually open.
 
 ## Step 4 — Get your database URL (safe to share)

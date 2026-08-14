@@ -56,7 +56,10 @@ target — do not upload it until all 7 parts are individually confirmed.
    relay itself clicks correctly on GPIO25/GPIO26 with **no pumps connected**, only wire real
    pumps to the relay's COM/NO/NC output afterward, each pump powered from its own external
    supply (never from the ESP32's own 5V/3.3V) sharing a common GND.
-6. **Servo — not yet built.**
+6. **Servo — sketch and README built (2026-08-14), not yet tested by the user.**
+   `hardware/rebuild/06_servo/` sweeps 0-180-0 degrees automatically to confirm smooth movement and
+   check for ESP32 resets/brownouts from the servo's startup current spike (same power warning as
+   the pump relay step -- power it from the external 5V supply, not the ESP32 board itself).
 7. **Full reintegration (all 7 back into one sketch) — not started.**
 
 - Separately, also produced `hardware/Hardware_Wiring_Guide.pdf` earlier this session — a single

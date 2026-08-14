@@ -108,10 +108,34 @@ document.getElementById("geoBtn").addEventListener("click", () => {
         station_id: null,
       });
     },
-    (err) => setLocationStatus(`Couldn't get your location (${err.message}).`),
-    { enableHighAccuracy: false, timeout: 10000 }
+    (err) => setLocationStatus(geoErrorMessage(err)),
+    { enableHighAccuracy: false, timeout: 20000 }
   );
 });
+
+// Per-error-code messages -- "Timeout expired" in particular is almost
+// always the OS's own Location Services being off (Windows: Settings ->
+// Privacy & security -> Location), not a bug here or anything to do with
+// this site's backend: the browser's in-page permission prompt only grants
+// the *website* permission, the OS can still silently block the actual
+// position lookup underneath it, which is exactly what times out. Picking
+// a station from the dropdown works either way and needs no location
+// access at all -- surfaced here explicitly so a stuck user has an
+// immediate way forward instead of just seeing an error.
+function geoErrorMessage(err) {
+  const fallback = "Pick a station from the dropdown instead — no location access needed.";
+  if (err.code === err.PERMISSION_DENIED) {
+    return `Location permission was denied. ${fallback}`;
+  }
+  if (err.code === err.TIMEOUT) {
+    return `Location timed out — usually means Location Services is turned off at the OS level ` +
+      `(not just the browser), or this device has no GPS/WiFi to get a position from. ${fallback}`;
+  }
+  if (err.code === err.POSITION_UNAVAILABLE) {
+    return `Your device couldn't determine a location right now. ${fallback}`;
+  }
+  return `Couldn't get your location (${err.message}). ${fallback}`;
+}
 
 function setLocation(loc) {
   currentLocation = loc;

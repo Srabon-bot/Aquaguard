@@ -93,9 +93,15 @@ Written plainly, not to oversell what's finished:
 - ⏳ **pH calibration page** (`ph-calibration.html`, linked from the dashboard header): code and
   firmware side (`hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino`) are written, but need a
   real Firebase project (see above) and a real ESP32 flash before this actually works end to end.
-- ⏳ **Public hosting (Vercel)**: not yet deployed — the dashboard currently runs locally only (Steps
-  1-2 above). The 3 model services are also local-only by design for now (a deliberate, documented
-  choice — see `MODEL_BUILD_PLAN.md` — to keep hosting cost/complexity at zero rather than a gap).
+- ✅ **Public hosting (Vercel)**: `frontend-glass/` is live at
+  **[frontend-glass-lilac.vercel.app](https://frontend-glass-lilac.vercel.app)** (static, zero-config,
+  redeploy with `vercel deploy --prod` from that folder). **Important limitation**: the model buttons
+  call `127.0.0.1:8000/8001/8002` — each *visitor's own machine*, not a shared server — so they only
+  work for whoever has `packages/run_all.py` running locally on the exact device viewing the page (the
+  3 model services are local-only by design, a deliberate documented choice, see
+  `MODEL_BUILD_PLAN.md`). Anyone else opening the link sees a "couldn't reach service" message on those
+  3 buttons — that's expected, not broken. For a live demo to someone else, run the services on your
+  own machine first, then share the link (or your screen).
 
 ---
 

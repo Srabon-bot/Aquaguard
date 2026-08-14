@@ -41,6 +41,13 @@ node_modules/
 # be shared/synced across machines or contributors.
 .claude/
 
+# Vercel CLI's local project link (project/org IDs for whichever machine ran
+# `vercel deploy` -- not secret, but machine-local linkage metadata, not
+# something to commit; Vercel's own convention). Currently only
+# frontend-glass/ is deployed; the wildcard covers frontend/ too if that
+# gets deployed later.
+.vercel/
+
 # Local-only "everything in one folder" snapshot for manually copying the
 # project to another PC without git (see AquaGuard_Portable_Package/START_HERE.md).
 # Deliberately NOT committed: it's a full duplicate of packages/, frontend/,

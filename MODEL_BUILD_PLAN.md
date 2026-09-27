@@ -221,6 +221,258 @@ in mind, not just what's convenient for historical training.
 
 ---
 
+
+## Part 8 — Precision Optimization & Tiered Alerts
+
+**Goal:** Replace the current 85%-recall / ~15%-precision regime with a trustworthy alert system farmers will act on. The current model produces 4–7 false alarms per real event — farmers will ignore warnings after 2–3 false alarms.
+
+### 8a. Probability Calibration
+- [ ] Collect validation-set probabilities from the current LightGBM model
+- [ ] Fit Platt scaling (logistic calibration) on validation probabilities vs. true labels
+- [ ] Fit isotonic regression as a non-parametric alternative
+- [ ] Compare calibration using reliability diagrams and Brier score
+- [ ] Pick the better calibrator and save it alongside the model artifact
+- [ ] Wire calibrator into FloodGBMModel.predict() so raw probabilities are calibrated before thresholding
+
+### 8b. Region-Specific Thresholds
+- [ ] Split validation set by basin (Brahmaputra, Ganges, Meghna, CHT)
+- [ ] Optimize per-basin thresholds independently:
+  - Brahmaputra: flash floods ? higher precision threshold
+  - Ganges: slow-rising ? can tolerate slightly lower precision
+  - Coastal/polder: surge + drainage ? different trigger logic
+- [ ] Save per-basin thresholds in a JSON config (e.g. 	hresholds_optimized.json)
+- [ ] Update _score_to_level() to accept basin and apply the correct threshold
+
+### 8c. Cost-Sensitive Training (Optional Enhancement)
+- [ ] Re-train LightGBM with class_weight='balanced' or custom sample_weight
+- [ ] Compare precision/recall tradeoff vs. post-hoc threshold tuning
+- [ ] Document which approach wins for each basin
+
+### 8d. Tiered Alert System
+- [ ] Replace 3-tier "low/moderate/high" with:
+  - **Watch** (elevated risk, monitor conditions)
+  - **Warning** (act in 24–48 hours: move stock, prepare pumps)
+  - **Emergency** (act now: evacuate stock, secure infrastructure)
+- [ ] Make tier cutoffs configurable in a frontend-facing config file
+- [ ] Update HorizonRisk schema to include tier confidence and uncertainty range
+- [ ] Update uild_reasoning() to emit tier-appropriate plain-language text
+
+**Done when:** A /predict/risk call returns calibrated probabilities, basin-aware thresholds, and tiered alerts with reasoning.
+
+---
+
+## Part 9 — Coastal Flood / Storm Surge Module
+
+**Goal:** Cover ~30–40% of Bangladesh's flood-prone aquaculture areas (coastal polders) that are completely dark under the current riverine-only models.
+
+### 9a. Data Assembly
+- [ ] Research and document free coastal data sources:
+  - BMD cyclone/surge forecasts (free, Bangladesh Meteorological Department)
+  - BIWTA tide gauge data (free, Bangladesh Inland Water Transport Authority)
+  - SRTM DEM (NASA, 30m free) — distance to coast + elevation
+  - Copernicus Sentinel-1 SAR (free) — actual water extent maps
+- [ ] Build coastal feature extractor: distance_to_coast_km, elevation_m, tidal_phase, surge_risk_index
+- [ ] Create coastal labels: cross-reference DFO/MODIS events with coastal districts
+
+### 9b. Model
+- [ ] Train a lightweight coastal flood classifier (Random Forest or Logistic Regression)
+- [ ] Use the same feature engineering pipeline style as the riverine model
+- [ ] Validate against known coastal flood events (Cyclone Amphan 2020, Sidr 2007, Aila 2009)
+
+### 9c. Integration
+- [ ] Add meta-classifier or weighted ensemble that selects riverine vs. coastal model per location
+- [ ] If lat/lon is within 25km of coast AND elevation < 5m, use coastal model
+- [ ] Otherwise fall back to riverine model
+- [ ] Update API response to include lood_type: "riverine" | "coastal" | "mixed"
+
+**Done when:** A query for Barisal, Patuakhali, or Cox's Bazar returns a coastal-specific risk assessment.
+
+---
+
+## Part 10 — Uncertainty Quantification
+
+**Goal:** Farmers and extension officers need confidence intervals, not just point estimates.
+
+### 10a. Quantile Regression
+- [ ] Re-train LightGBM models using objective='quantile' with alpha = 0.1, 0.5, 0.9
+- [ ] Save three model variants per horizon (q10, q50, q90) or use LightGBM's multi-output quantile
+- [ ] Report prediction intervals in API response: probability_low, probability_median, probability_high
+
+### 10b. Ensemble Spread (Alternative)
+- [ ] Train 10 LightGBM models with different random seeds
+- [ ] Report mean probability + std dev across ensemble
+- [ ] Use std dev to adjust tier: high uncertainty ? "Watch" instead of "Warning"
+
+### 10c. Frontend Display
+- [ ] Update frontend to show uncertainty bands on risk charts
+- [ ] Add "Confidence: High / Medium / Low" badge to each prediction
+- [ ] Plain-language: "Model is 80% confident risk will exceed threshold" vs. "Conditions are uncertain; monitor closely"
+
+**Done when:** Every /predict/risk response includes a confidence interval or uncertainty score.
+
+---
+
+## Part 11 — Farmer Feedback Loop
+
+**Goal:** Create a self-improving system where verified farmer reports become better training labels.
+
+### 11a. Reporting Interface
+- [ ] Design simple SMS/USSD/WhatsApp message format: "AQUA [district] [status] [level]"
+  - Status: FLD (flooded), OK (normal), WET (water rising)
+  - Level: optional water depth in cm or feet
+- [ ] Build ingestion endpoint /feedback/report that accepts and validates reports
+- [ ] Store reports in Firebase (reuse existing Firebase setup) with timestamp, location, status
+- [ ] Add moderator dashboard for extension officers to verify/correct reports
+
+### 11b. Label Integration
+- [ ] Weekly job: merge verified feedback into training labels
+- [ ] Re-train models monthly with accumulated feedback
+- [ ] Use active learning: flag predictions where model confidence is low AND no feedback exists — prioritize these for verification requests
+- [ ] Track feedback volume and model improvement over time
+
+### 11c. Farmer Communication
+- [ ] Add SMS alert option: send warning via SMS when tier = "Emergency"
+- [ ] Add WhatsApp bot for two-way communication
+- [ ] Localize messages in Bangla
+
+**Done when:** At least 50 verified farmer reports have been ingested and used in a model retrain.
+
+---
+
+## Part 12 — Complete CHIRPS Backfill & Additional Data Sources
+
+**Goal:** Expand the training dataset beyond Open-Meteo ERA5 to include longer, higher-resolution, and complementary data sources.
+
+### 12a. CHIRPS Completion
+- [ ] Resume ackend/train/ingest_chirps.py from 2006 onward (26 of 46 years already on disk)
+- [ ] Fix ChunkedEncodingError retry logic before running
+- [ ] Verify final dataset: 1981–present, all Bangladesh + upstream GBM catchment
+- [ ] Merge CHIRPS rainfall as a secondary feature alongside Open-Meteo
+
+### 12b. GloFAS-ERA5 via Copernicus CDS
+- [ ] Register for free Copernicus Climate Data Store (CDS) account
+- [ ] Install cdsapi Python package
+- [ ] Configure .cdsapirc with API key
+- [ ] Pull GloFAS-ERA5 discharge reanalysis for 6 virtual stations: 1979–present
+- [ ] Validate against existing Open-Meteo discharge data (should correlate strongly)
+- [ ] Use GloFAS as primary historical discharge; Open-Meteo as live fallback
+
+### 12c. SRTM DEM & Terrain Features
+- [ ] Download SRTM 30m DEM tiles for Bangladesh + upstream catchment
+- [ ] Extract per-station: elevation_m, slope_deg, distance_to_river_km, upstream_area_km2
+- [ ] Add as static features in dd_static_terrain_features()
+- [ ] Update eature_schema.json and retrain
+
+### 12d. SoilGrids (ISRIC)
+- [ ] Download SoilGrids data for Bangladesh: soil type, texture, drainage class, organic carbon
+- [ ] Map to virtual station coordinates
+- [ ] Add as categorical/ordinal features
+- [ ] Expected impact: soil drainage class is a top-cited flood driver in Bangladesh ML literature
+
+### 12e. Sentinel-1 SAR Flood Validation
+- [ ] Access Copernicus Open Access Hub for Sentinel-1 GRD data
+- [ ] For known flood events (2020, 2022, 2024), download pre/post SAR images
+- [ ] Use simple threshold-based water classification (VV < -20 dB typical for open water)
+- [ ] Generate binary flood extent maps for validation
+- [ ] Cross-check model predictions against SAR-derived actual inundation
+
+### 12f. TerraClimate (Optional, High Value)
+- [ ] Download TerraClimate monthly data (1958–present, ~4km resolution) for precipitation, PET, soil moisture, temperature
+- [ ] Use as a long-term climate baseline for trend detection and extreme event frequency analysis
+- [ ] Complements the daily Open-Meteo data with a longer contextual layer
+
+**Done when:** Training dataset includes Open-Meteo ERA5 (daily, 1950+) + CHIRPS (daily, 1981+) + GloFAS-ERA5 (daily, 1979+) + SRTM terrain + SoilGrids, with validation against Sentinel-1 SAR flood extents.
+
+---
+
+## Part 13 — Model Architecture Enhancements
+
+**Goal:** Test and deploy a richer model ensemble that maintains deployability while improving accuracy.
+
+### 13a. Baseline Comparison
+- [ ] Train XGBoost on the same feature set; compare AUC-PR, precision@85%recall, calibration vs. LightGBM
+- [ ] Train CatBoost on the same feature set; compare categorical handling (native vs. pandas Categorical)
+- [ ] Train Logistic Regression as a simple linear baseline
+- [ ] Document which model wins on which metric
+
+### 13b. Stacked Ensemble
+- [ ] Create 3-fold time-series cross-validation splits
+- [ ] Train LightGBM, XGBoost, CatBoost, and LogisticRegression on each fold
+- [ ] Use out-of-fold predictions as training data for a meta-learner (Logistic Regression or LightGBM)
+- [ ] Compare ensemble vs. best single model on holdout test set
+- [ ] If ensemble wins by >2% AUC-PR, adopt it; otherwise stick with single LightGBM (simpler to deploy)
+
+### 13c. Quantile LightGBM
+- [ ] Re-train with objective='quantile', alpha=[0.1, 0.5, 0.9]
+- [ ] Save three model variants per horizon or use LightGBM native multi-output
+- [ ] Report prediction intervals in API response
+
+### 13d. Coastal Model
+- [ ] Train Random Forest or Logistic Regression on coastal-specific features
+- [ ] Keep it lightweight — coastal data is scarcer, simpler models generalize better
+- [ ] Integrate via meta-classifier in the API
+
+**Done when:** Best model architecture is selected based on validation performance, deployed in models_enhanced/, and ready for A/B testing against the current production model.
+
+---
+
+## Part 14 — API & Frontend Hardening
+
+**Goal:** Make the deployed system production-grade.
+
+### 14a. API Improvements
+- [ ] Add /weather/current endpoint for plain weather display (reuses etch_rainfall())
+- [ ] Add request/response logging middleware (timestamp, IP, lat/lon, features hash, model version, output)
+- [ ] Add prediction audit log to Firebase for compliance and debugging
+- [ ] Lock CORS: ["http://localhost:5502", "https://aquaguard.vercel.app"] — never ["*"] in production
+- [ ] Add rate limiting per IP (prevent abuse of free upstream APIs)
+- [ ] Add model version in every response header (X-Model-Version)
+
+### 14b. Frontend Improvements
+- [ ] Show uncertainty band on risk chart
+- [ ] Add confidence badge to each prediction
+- [ ] Show "last updated" timestamp for each data source
+- [ ] Show "data freshness" warning if any source is >6 hours old
+- [ ] Replace 127.0.0.1 model buttons with configurable API URL
+- [ ] Add Bangla translation layer for farmer-facing text
+
+### 14c. DevOps
+- [ ] Add Makefile with targets: setup, 	rain, serve, 	est, lint
+- [ ] Add scripts/setup.sh and scripts/setup.bat for one-command environment setup
+- [ ] Generate equirements.lock via pip freeze
+- [ ] Add .env.example template (without real credentials)
+- [ ] Document EARTHDATA_TOKEN 60-day expiry rotation in README
+
+**Done when:** make setup produces a working environment, make serve starts the API, and the frontend shows calibrated, tiered, uncertainty-quantified predictions.
+
+---
+
+## Part 15 — IoT Hardware Integration
+
+**Goal:** Wire the ESP32 sensor data into the live prediction pipeline.
+
+### 15a. Sensor Data Pipeline
+- [ ] Flash main sketch to ESP32 (4 of 7 sensors already individually wired/confirmed)
+- [ ] Add remaining sensors: dissolved oxygen, ORP (if PCB supports)
+- [ ] Test end-to-end: sensor ? ESP32 ? Firebase ? backend ? model feature
+- [ ] Implement 3-tier fallback for soil moisture: IoT sensor ? Open-Meteo ? NaN
+- [ ] Calibrate raw sensor readings to volumetric water content (m³/m³) at 0–7cm depth
+
+### 15b. Pump Control
+- [ ] Wire pump relay to ESP32 GPIO
+- [ ] Add /pump/control API endpoint (authenticated)
+- [ ] Add auto-pump rule: if risk_level="Emergency" AND water_level < threshold ? start pump
+- [ ] Add manual override from dashboard
+- [ ] Add pump status display on dashboard
+
+### 15c. Historical Sensor Logging
+- [ ] Store sensor readings in Firebase with timestamp
+- [ ] Build analytics page showing 7/30/90-day sensor trends
+- [ ] Use sensor data to validate/correct model predictions (was it actually flooded?)
+
+**Done when:** Sensor data flows from ESP32 through Firebase into the model's live feature row, and pump control works from the dashboard.
+
+---
 ## Progress Log
 
 Append a new entry below every ~5 minutes of active work. Format:

@@ -134,3 +134,138 @@ snapshot) and `manuals/` (the tracked-in-git copy) both re-synced with all of th
   exercised end-to-end until a real Firebase project exists and its databaseURL is filled into
   `ph-calibration.js` — same blocking dependency as the rest of the deferred hardware-integration
   plan.
+
+### 2026-08-15 (Step 1 pH calibration attempted — suspected dead module, diagnostic PDF built for tomorrow)
+
+Came back to Step 1 (pH) now that kitchen calibration solutions (vinegar, baking soda) were available.
+Wired per `hardware/rebuild/01_ph_sensor/README.md`, uploaded `ph_calibration_tool.ino`. **Result:
+`Po` (GPIO34) locked at exactly 3.300V (ADC max) regardless of what the probe was dipped in — never
+moved.**
+
+Extensive live troubleshooting, each step ruling out one layer:
+- Wiring re-checked against photos — correct (`Po`→GPIO34, `G`→GND, `V+`→3.3V, `To`/`Do` unconnected;
+  this board's header has two `G` pins, a known variant).
+- Unplugged `V+` — reading dropped cleanly to 0.000V and back to 3.300V when reconnected. Rules out a
+  breadboard-row short bridging GPIO34 directly to the 3.3V rail; proves the signal path itself is
+  real, not a wiring bridge.
+- Turned both trim pots through full range, multiple directions — zero effect, even with a clean short
+  from the BNC center pin to its outer shell (a defined "zero input" test, technique borrowed from
+  [a YouTube reference](https://youtu.be/hMEzz5o4TZw) after our own procedure didn't cover a
+  hardware-side offset trim step).
+- Jumpered GPIO34 directly to ESP32 GND, bypassing the module entirely — read a clean ~0.00–0.05V.
+  **Proves the ESP32/GPIO34/breadboard side is completely fine.**
+- Touching *only* the BNC connector's outer shell (not a proper short) made the reading swing wildly
+  (1.01V → 0.07V → 3.30V) and lit the module's red threshold-comparator LED (`Do`'s indicator).
+
+**Working diagnosis**: a floating (not actually grounded) BNC shell — most likely a broken/cold solder
+joint between the connector's shell and the board's ground plane. This single explanation accounts for
+every symptom observed: the short-to-shell test doing nothing (shorting to a floating point defines
+nothing), the wild swings under a bare touch (body/room-ground acting as an unstable alternate
+reference), and the LED flicker (a floating signal randomly crossing the comparator threshold). Every
+test that could isolate the ESP32/wiring side from the module side came back clean on the ESP32 side —
+the fault is inside the module.
+
+**Built `hardware/PH_Module_Multimeter_Diagnostic.pdf`** (source: `PH_MODULE_MULTIMETER_DIAGNOSTIC.md`)
+— a step-by-step continuity/voltage test procedure for tomorrow once a multimeter is available, with
+expected readings and what each outcome means, plus a fill-in results checklist. Core test: continuity
+between the BNC shell and the module's `G` pin — no beep confirms the diagnosis (repair by reflowing
+the solder joint if a soldering iron is available, otherwise treat the module as defective and replace
+it); a beep would mean the theory is wrong and the guide's remaining rows narrow down the next
+hypothesis instead.
+
+**Same-day follow-up — a long detour caused by a code bug, caught and corrected before it went
+anywhere.** Wanting to change wires first (cheapest possible fix) and cross-check the module's onboard
+temperature sub-circuit at the same time, built a combined diagnostic sketch
+(`hardware/rebuild/01_ph_sensor/ph_wiring_diagnostic/ph_wiring_diagnostic.ino`) reading `Po` on GPIO34
+and `To` on GPIO33 side by side. After rewiring with fresh jumpers, `Po` appeared to read a stable
+~1.9V instead of the locked 3.300V — looked like the fix had worked. A long series of follow-up tests
+(unplugging `G`, `V+`, `To`; touching wires to different pins) produced a run of results that didn't
+add up as genuine sensor behavior (e.g. `Po` reading the same value whether or not its own wire was
+even connected to GPIO34; the reading depending on a wire being seated in one specific, seemingly
+unrelated breadboard hole).
+
+**Root cause, found by the user, not caught in review beforehand**: `#define PH_PIN` in the diagnostic
+sketch actually read `33`, not `34` — a typo from when GPIO35 (originally planned for `To`) was
+switched to GPIO33 partway through (GPIO35 was already claimed by the TDS sensor, then GPIO36/39
+turned out not to be broken out on this board variant either). The line labeled `"Po (pH)"` had been
+printing GPIO33 the entire time — which is exactly where the `To` wire was physically plugged. Every
+confusing result above has an obvious explanation once this is known (e.g. `Po` being unaffected by
+its own wire's connection state, because the code was never reading that pin at all).
+
+**Corrected to `PH_PIN`=34, `TEMP_PIN`=33 and re-tested. Real result: `To` (the module's onboard
+thermistor, now actually being read) shows a stable, sane ~1.900V — proving the board's power and
+ground are genuinely healthy in general. `Po` (the real pH signal, now actually being read) is still
+locked at exactly 3.300V — unchanged from the very first symptom two days ago.** Nothing was actually
+fixed today; a real, unrelated bug produced a false-positive that looked like a fix. The silver lining:
+ruling out a board-wide power/ground problem (via `To`'s healthy reading) makes the original BNC-shell
+theory *more* confident, not less — the fault is isolated specifically to the `Po` signal path, not the
+module as a whole.
+
+- **Resume point — unchanged in substance, stronger evidence behind it**: run the multimeter tests in
+  `PH_Module_Multimeter_Diagnostic.pdf` once a multimeter is available, starting with the
+  BNC-shell-to-`G` continuity check. Step 1 (pH) stays blocked until that's resolved (repair or
+  replacement module) — do not proceed to Step 2 in the meantime if Step 2 hasn't already been started,
+  per this rebuild's "confirm each step before wiring the next" discipline. Worth double-checking pin
+  `#define`s by eye against intent before trusting a diagnostic sketch's output next time this happens
+  again — a plain read-through would have caught this immediately.
+---
+
+
+### 2026-09-08 (Step 1 pH: voltage divider built, calibration tool fixed for 5V + divider)
+
+**Voltage divider construction:**
+- Built 1/3 divider from three 10k resistors: two in series (20k high side) + one 10k to GND (low side)
+- PH4502C Po -> 20k pair -> junction -> 10k -> GND, with GPIO 34 tapping the junction
+- Verified resistances (power OFF): 20k pair = 18.9-19k, single 10k = 9.67k, GPIO34-to-GND = 9.8k � all within tolerance
+
+**Voltage verification (power ON):**
+- V+ to G = 4.9V (5V supply confirmed)
+- Po to G with BNC shorted = 2.50V (op-amp midpoint reached)
+- GPIO 34 to GND with BNC shorted = 0.82V (divider working, 2.50/3 = 0.833)
+- Po to G with BNC open = 4.90V (offset pot at rail, not holding)
+- GPIO 34 to GND with BNC open = 1.62V
+
+**Offset potentiometer failure:**
+- The blue PCB-mounted trimmer does not hold its wiper position � Po returns to 4.90V when the BNC short is removed
+- Root cause: weak wiper contact on the trimmer, springs back after adjustment
+- Decision: abandoned hardware pot calibration entirely
+
+**BNC shell ground wire removed:**
+- The white wire previously wrapped around the BNC shell was removed � it was shorting the virtual ground to board GND, which is wrong. The BNC shell must float.
+
+**Calibration tool sketch fixed:**
+- File: `hardware/AquaGuard_v2/01_ph_sensor/ph_calibration_tool/ph_calibration_tool.ino`
+- Problem: original sketch assumed 3.3V direct operation with no divider
+- Fixes applied:
+  1. Added `const float DIVIDER_RATIO = 3.0;`
+  2. Replaced `readPhVoltageAveraged` to use `analogReadMilliVolts(PH_PIN)` multiplied by `DIVIDER_RATIO`
+  3. Updated header comment to document 5V/Vin power and 1/3 divider
+- Result: sketch now reports true Po voltage (0.5V-5.0V range) instead of divided voltage
+
+### 2026-09-09 (Step 1 pH: calibration tool uploaded, probe tested, reverse calibration planned)
+
+**Sketch upload and live voltage verification:**
+- Uploaded fixed `ph_calibration_tool.ino` to ESP32
+- BNC shorted: stable 2.59V at Po (expected ~2.50V, close enough � confirms code fix works)
+- BNC open / probe removed: stable 4.93-5.07V at Po (op-amp at rail, expected)
+
+**Probe immersion tests:**
+- Probe in air (connected, no liquid): ~3.07-3.22V (probe loading the circuit)
+- Probe in vinegar (pH 2.4): ~3.46-3.53V
+- Probe in baking soda (pH 8.3): ~3.18-3.23V
+- **Finding: readings are inverted** � vinegar (acidic) gives higher voltage than baking soda (basic). This is either a BNC wiring polarity issue or probe behavior, but the calibration tool handles it.
+
+**Tap water test:**
+- With current uncalibrated readings, tap water mapped to pH 8.3 � plausible for Dhaka groundwater, confirms the math is computing consistently
+
+**Decision: reverse calibration order**
+- Type `a` while probe is in baking soda (captures base voltage as "acid" point)
+- Type `b` while probe is in vinegar (captures acid voltage as "base" point)
+- The calibration math computes a negative slope, which is mathematically valid and produces correct pH values
+- This bypasses the inverted polarity issue without needing to rewire the BNC
+
+**Resume point:**
+- [ ] Run reverse calibration: `a` (baking soda) -> `b` (vinegar) -> `s` (save)
+- [ ] Test with tap water using `t` command
+- [ ] Upload `01_ph_sensor.ino` for normal operation
+- [ ] Calibration persists in ESP32 flash (NVS Preferences namespace "phcal")

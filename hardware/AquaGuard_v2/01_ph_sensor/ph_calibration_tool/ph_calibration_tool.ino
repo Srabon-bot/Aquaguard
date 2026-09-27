@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // AquaGuard rebuild -- pH sensor CALIBRATION TOOL
 // ============================================================================
 // Interactive two-point calibration over Serial. Run this once (or whenever
@@ -7,9 +7,10 @@
 // re-uploading other sketches -- 01_ph_sensor.ino (the normal-use sketch)
 // reads it automatically on boot, no manual editing/reflashing needed.
 //
-// WIRING: identical to 01_ph_sensor.ino -- see that sketch's header comment
-// or hardware/rebuild/01_ph_sensor/README.md before running this. Same
-// warning applies: pH module VCC -> ESP32 3.3V, NOT 5V.
+// WIRING: pH module VCC -> ESP32 5V/Vin (CA3140 op-amp needs 4.0V min).
+// Po -> 1/3 voltage divider (two 10k in series + one 10k to GND) -> ESP32 GPIO 34.
+// The divider caps GPIO 34 at ~1.67V max. This sketch multiplies by 3 to
+// recover the true Po voltage before calibration math.
 //
 // HOW TO USE
 //   1. Upload this sketch. Open Serial Monitor, baud 115200, line ending set
@@ -33,8 +34,8 @@
 #include <math.h>
 
 #define PH_PIN 34
-const float VREF    = 3.3;
-const float ADC_RES = 4095.0;
+
+const float DIVIDER_RATIO = 3.0;
 
 // Reference pH of each kitchen solution -- see README.md for why these values
 // and how to prepare them. Change these two lines if you use different
@@ -55,11 +56,11 @@ String inputLine = "";
 float readPhVoltageAveraged(int samples) {
   long sum = 0;
   for (int i = 0; i < samples; i++) {
-    sum += analogRead(PH_PIN);
+    sum += analogReadMilliVolts(PH_PIN);
     delay(20);
   }
-  float avgRaw = (float)sum / samples;
-  return avgRaw * (VREF / ADC_RES);
+  float avgMv = (float)sum / samples;
+  return (avgMv / 1000.0) * DIVIDER_RATIO;
 }
 
 void printHelp() {

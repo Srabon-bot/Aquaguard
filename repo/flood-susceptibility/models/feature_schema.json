@@ -1,0 +1,35 @@
+{
+  "model_type": "random_forest",
+  "feature_columns": [
+    "elevation_m",
+    "slope_deg",
+    "dist_to_river_m",
+    "drainage_density_km_per_km2",
+    "landcover_class",
+    "basin"
+  ],
+  "categorical_features": [
+    "landcover_class",
+    "basin"
+  ],
+  "landcover_classes": {
+    "10": "tree",
+    "20": "shrubland",
+    "30": "grassland",
+    "40": "cropland",
+    "50": "built-up",
+    "60": "bare/sparse",
+    "70": "snow/ice",
+    "80": "water",
+    "90": "wetland",
+    "95": "mangrove",
+    "100": "moss/lichen"
+  },
+  "basins": [
+    "brahmaputra",
+    "cht",
+    "ganges",
+    "meghna"
+  ],
+  "notes": "landcover_class and basin must be provided as their pandas 'category' codes if using random_forest, or as pandas 'category' dtype directly if using lightgbm."
+}

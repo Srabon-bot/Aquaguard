@@ -1,0 +1,17 @@
+Parameter,Value
+Study Period,2008-01-01 to 2022-12-31
+Total Calendar Days,"5,479"
+Missing Daily WL Values,335 days
+Missing Data Share (%),6.11%
+Gauge Level Range (m),11.68 to 21.16
+Danger Level Threshold (m),19.05
+Extreme Level Threshold (m),19.90
+Recorded Highest Water Level (RHWL) (m),20.63
+Total Days >= Danger Level (19.05 m),467 days
+Total Days >= Extreme Level (19.90 m),93 days
+Total Days >= RHWL (20.63 m),16 days
+Identified Independent Flood Events,34
+Mean Flood Event Duration (days),13.7 days
+Max Flood Event Duration (days),44 days
+Development Window (Train/CV),2008 – 2019 (12 years)
+Final Test Holdout Window,2020 – 2022 (3 years)

@@ -1,0 +1,1247 @@
+AquaShield: Intelligent Aquaculture Monitoring and Adaptive Protection System Using Machine Learning and IoT
+By
+1. Md. Shahriar hossain srabon ID: 0432310005101056
+2. Md. Mahfuz ID: 0432310005101057
+3. Hrithik saha ID: 0432310005101071
+Department of Computer Science and Engineering
+Faculty of Science and Engineering
+A Capstone Project Submitted in partial fulfillment of the requirements for the degree of Bachelor of Science in Computer Science and Engineering
+Supervised By
+Sultana Rokeya Naher
+Associate Professor
+Department of Computer Science and Engineering
+University of Information Technology and Sciences (UITS)
+Baridhara J Block, Dhaka 1212
+May, 2026
+Declaration
+The capstone project work entitled "AquaShield: Intelligent Aquaculture Monitoring and Adaptive Protection System Using Machine Learning and IoT" is a bonafide record of work carried out by Md. Shahriar hossain srabon (ID: 0432310005101056), Md. Mahfuz (ID: 0432310005101057), and Hrithik saha (ID: 0432310005101071) under the supervision of Sultana Rokeya Naher, Associate Professor, Department of Computer Science and Engineering (CSE), University of Information Technology and Sciences (UITS), Dhaka, Bangladesh.
+This work, in whole or in part, has not been submitted elsewhere for the award of any degree or diploma.
+Candidates:
+------------------------------------------------------------------------
+Md. Shahriar hossain srabon
+Student ID: 0432310005101056
+Department of Computer Science and Engineering, UITS
+------------------------------------------------------------------------
+Md. Mahfuz
+Student ID: 0432310005101057
+Department of Computer Science and Engineering, UITS
+------------------------------------------------------------------------
+Hrithik saha
+Student ID: 0432310005101071
+Department of Computer Science and Engineering, UITS
+Approval
+This is to certify that the capstone project work submitted by Md. Shahriar hossain srabon (ID: 0432310005101056), Md. Mahfuz (ID: 0432310005101057), and Hrithik saha (ID: 0432310005101071) entitled "AquaShield: Intelligent Aquaculture Monitoring and Adaptive Protection System Using Machine Learning and IoT" has been examined and approved by the Capstone Project Review Committee in partial fulfillment of the requirements for the degree of Bachelor of Science in Computer Science and Engineering (CSE) in the Department of Computer Science and Engineering (CSE), University of Information Technology and Sciences (UITS), Dhaka, Bangladesh in Spring 2026.
+CAPSTONE PROJECT REVIEW COMMITTEE
+................................................................
+[Head of Department Name]
+Head of the Department
+Department of Computer Science and Engineering (CSE)
+University of Information Technology and Sciences (UITS)
+(Convener)
+................................................................
+Sultana Rokeya Naher
+Associate Professor
+Department of Computer Science and Engineering (CSE)
+University of Information Technology and Sciences (UITS)
+(Supervisor)
+................................................................
+[External Examiner Name]
+Professor / External Expert
+Department of Computer Science and Engineering
+University of Information Technology and Sciences (UITS)
+(Member)
+................................................................
+[Internal Coordinator Name]
+Coordinator, Capstone Project Committee
+Department of Computer Science and Engineering (CSE)
+University of Information Technology and Sciences (UITS)
+(Member Secretary)
+Acknowledgement
+First of all, we thank Almighty Allah for giving us the patience, health, and ability to complete our capstone engineering project.
+We express our sincere gratitude to our supervisor, Sultana Rokeya Naher, Associate Professor, Department of Computer Science and Engineering, University of Information Technology and Sciences (UITS). Her constant advice, regular feedback, and encouragement helped us solve practical hardware problems, design our database, and evaluate our machine learning models correctly.
+We also thank the Head of the Department of Computer Science and Engineering and all our teachers and lab staff at UITS for their support and for providing us with the necessary computing and laboratory facilities during our study.
+We are thankful to the Bangladesh Water Development Board (BWDB) and Flood Forecasting and Warning Centre (FFWC) for making historical river gauge records available. We also acknowledge Open-Meteo for providing free ERA5 catchment rainfall data.
+Finally, we are grateful to our parents and family members for their continuous support and sacrifices throughout our university life. We also thank each other for working together as a team with dedication to build AquaShield.
+Justification Report
+Below is the Course Outcome to Program Outcome (CO-PO) Mapping, Justification of PO through COs, Complex Engineering Problem (CEP) Justification, and Range of Complex Engineering Activities (CEA) Report for our project titled "AquaShield: Intelligent Aquaculture Monitoring and Adaptive Protection System Using Machine Learning and IoT".
+CO-PO Mapping
+CO-PO Mapping Matrix for AquaShield
+CO No.
+Description of CO
+KP
+CP
+CA
+CO1
+Apply engineering fundamentals and computing knowledge to identify and translate real-life aquaculture water quality problems and monsoon flood threats into an intelligent IoT and ML solution.
+K1, K2, K3, K4
+-
+-
+CO2
+Identify, formulate, and analyze water quality requirements (pH, TDS, temperature, depth) and flood threshold limits to reach substantiated conclusions using data.
+K2, K3, K4
+WP1, WP2, WP3
+-
+CO3
+Design and build an integrated system combining an ESP32 sensor node, local relay control logic, cloud data storage, and machine learning prediction models.
+K3, K5, K6
+WP1, WP3, WP5
+-
+CO4
+Select and apply modern hardware and software tools including ESP32, Arduino C++, Firebase Realtime Database, Python FastAPI, Scikit-learn, and XGBoost.
+K3, K5, K6
+WP1, WP3, WP4
+-
+CO5
+Function effectively as individual contributors and as a 3-member engineering team with clear task distribution and regular coordination.
+-
+-
+-
+CO6
+Demonstrate project management and budgeting skills by keeping the total prototype hardware cost under 7,200 BDT (~\$60) for rural fish farmers.
+-
+-
+-
+CO7
+Conduct experimental investigations using laboratory buffer solutions for sensor calibration and 15 years of river data with Leave-One-Year-Out validation.
+K6, K8
+WP1, WP2, WP3
+-
+CO8
+Assess the real-world impact of the project on rural aquaculture, protecting fish from mortality and saving farmers from severe financial loss.
+K8, K7
+WP1, WP3, WP4
+-
+CO9
+Evaluate environmental sustainability by minimizing water pumping, preventing chemical over-concentration, and avoiding feed wastage.
+K7
+-
+-
+CO10
+Commit to professional engineering ethics by reporting true empirical results, citing all references properly, and explaining model predictions with SHAP.
+K7
+-
+-
+CO11
+Communicate engineering work clearly through a complete written technical project book and oral defense presentation.
+-
+-
+EA1, EA2, EA3, EA5
+CO12
+Recognize the need for lifelong learning by researching future system extensions like on-device TinyML and LoRaWAN wireless networks.
+-
+-
+-
+Justification of PO through COs
+Justification of PO through COs for AquaShield
+CO No.
+PO
+Justification (with Specific Report References)
+CO1
+PO1
+We applied basic electronics, sensor physics (Nernst equation for pH, electrical conductivity for TDS, ultrasonic time-of-flight), and machine learning regression to solve real-world pond water deterioration and river flood overflow in Bangladesh. (Reported in Section 1.2, 3.3, and 3.6).
+CO2
+PO2
+We formulated the technical requirements for pond water monitoring and river flood warnings, defining mathematical conversion formulas, 1-hour TDS lag features, and water danger thresholds evaluated using RMSE, MAE, and NSE metrics. (Reported in Section 1.3, 3.6, and 5.3).
+CO3
+PO3
+We designed and assembled the complete system: an ESP32 edge node with optocoupler-isolated relays, local autonomous FSM rules for the pumps and the servo feeder, a Firebase Realtime Database cloud layer, and three machine learning models served by a Python FastAPI backend. (Reported in Chapters 3 and 4).
+CO4
+PO5
+We selected and used standard modern engineering tools including ESP32 32-bit MCU, PlatformIO/Arduino IDE, Firebase Realtime Database, Python FastAPI, Python Scikit-learn, XGBoost, and SHAP. (Reported in Section 4.2 to 4.6).
+CO5
+PO9
+Our 3-member team divided tasks effectively: Srabon handled hardware fabrication and power wiring, Mahfuz integrated the ESP32 with the Firebase Realtime Database and built the web dashboard, and Hrithik developed the Python FastAPI backend and the ML flood forecasting and anomaly detection models. (Reported in Section 4.1).
+CO6
+PO11
+We managed component procurement and prepared a detailed Bill of Materials totaling 6,570 BDT (\$55.15 USD), proving our system is affordable for marginal fish farmers in Bangladesh. (Reported in Section 3.3, Table 3.1).
+CO7
+PO4
+We conducted practical investigations: we calibrated the pH sensor with vinegar (pH 2.4) and baking soda (pH 8.3) reference solutions, evaluated sensor accuracy against standard buffer solutions, and validated our river flood model on 15 years (2008--2022) of BWDB records using Leave-One-Year-Out (LOYO) cross-validation to prevent data leakage. (Reported in Section 3.3, 3.7, 5.2, and 5.3).
+CO8
+PO6
+We evaluated the socioeconomic impact on rural communities: preventing fish kills protects farmer income, safeguards food security, and avoids financial devastation during monsoon river overflows. (Reported in Section 1.1, 2.2, and 6.1).
+CO9
+PO7
+We designed closed-loop control rules that save water by pumping only when necessary, prevent pond pollution from excess feed, and use energy-efficient 12V DC power components. (Reported in Section 3.4 and 4.2).
+CO10
+PO8
+We maintained academic honesty by using real observed datasets, reporting actual prediction errors without bias, explaining tree predictions via SHAP, and properly citing all literature. (Reported in Section 5.4, 5.7, and References).
+CO11
+PO10
+We wrote this complete, well-documented technical capstone report adhering to UITS and IEEE standards, created 13 figures (Fig. 3.1 to Fig. 5.11) and 15 numbered tables, and prepared slides for our oral defense. (Reported throughout the entire book and Appendix B).
+CO12
+PO12
+We recognized that technology continues to evolve, so we studied and documented future upgrade paths including running TinyML directly on the ESP32 and adding LoRaWAN mesh networking. (Reported in Section 6.2).
+Complex Engineering Problem (CEP) Justification
+Complex Engineering Problem (CEP) Justification Matrix
+Attribute Category
+Attribute Name & ID
+BAETE Criteria [24] & Project Justification (with Report References)
+1. Mandatory Attribute
+Depth of Knowledge (P1)
+Solving this problem required knowledge from multiple engineering fields (K4): embedded systems (ADC oversampling, voltage-divider interfacing, 3.3V analog sensor design), cloud data handling (Firebase Realtime Database, Python FastAPI REST services), time-series machine learning, and Explainable AI (SHAP). We studied research literature (K8) to handle time-series data leakage and peak extrapolation. (Reported in Section 2.4, 2.5, 3.6, 5.3).
+2. Supporting Attribute
+Range of Conflicting Requirements (P2)
+We balanced conflicting constraints: low hardware cost (<\$60) vs. good sensor accuracy; real-time cloud updates vs. frequent rural internet dropouts; and long flood forecast horizons (+14 days) vs. growing prediction error. (Reported in Section 1.2, 3.4, 5.6).
+3. Supporting Attribute
+Depth of Analysis Required (P3)
+Standard random train-test splitting fails on river data because it leaks future temporal information. We designed a Leave-One-Year-Out cross-validation scheme and analyzed stratified water-level errors across 5,479 days to prove why linear models beat tree models during extreme flood crests. (Reported in Section 3.7, 5.3, 5.7).
+4. Supporting Attribute
+Familiarity of Issues (P4)
+Real aquaculture ponds do not have labeled 'good water' vs. 'bad water' datasets. We handled this unfamiliar unsupervised scenario by combining sensor rate-of-change deltas with Isolation Forest, successfully isolating dangerous multivariate conditions like high pH + high temperature. (Reported in Section 2.2, 3.6, 5.5).
+5. Supporting Attribute
+Interdependence (P7)
+The parts of our system depend heavily on each other: hardware ADC calibration directly determines data accuracy; clean cloud data feeds the ML models; and ML flood early warnings give farmers lead time to raise perimeter netting. (Reported in Section 3.2, 4.7, 5.6).
+Range of Complex Engineering Activities (CEA) Justification
+Range of Complex Engineering Activities (CEA) Justification Matrix
+Activity ID
+Activity Title
+Engineering Activity Justification (with Report References)
+A1
+Range of Resources
+We utilized diverse hardware components (ESP32, pH-4502C, TDS probe, NTC thermistor, HC-SR04, optocoupled relays, buck converter), software stacks (Firebase Realtime Database, Python FastAPI, vanilla HTML/CSS/JavaScript), and 15 years of BWDB hydrological records and ERA5 rainfall data. (Reported in Chapter 3 and Chapter 4).
+A3
+Innovation
+We combined macro-scale river flood forecasting (giving 3 to 7 days warning to protect pond dikes) with micro-scale pond water automation and unsupervised anomaly detection, adding SHAP explainability so farmers can understand the alerts. (Reported in Section 3.2, 3.6, 5.4).
+A4
+Consequences for Society & Environment
+Our project directly helps fish farmers in flood-prone districts of Bangladesh avoid financial bankruptcy, protects national food supply, reduces clean water wastage, and avoids toxic chemical spikes. (Reported in Section 1.1, 2.2, 6.1).
+Mapping to PO10 (Communication)
+Written Technical Documents: Prepared an effective, detailed capstone project report following UITS format [25] and IEEE citation standards. (Evaluation criterion: Technical Book Assessment).
+Oral Presentations: Prepared and rehearsed formal multimedia presentation slides for the Capstone Review Committee defense; (Evaluation criterion: Oral Defense Evaluation).
+Visual Representation: Created 13 technical figures, including the system architecture schematic (Fig. 3.1), the LOYO validation workflow (Fig. 3.2), flood-season hydrographs (Fig. 5.3), the SHAP summary plot (Fig. 5.8), and the anomaly detection scatter plot (Fig. 5.9), together with tables summarizing hardware, rules, and results. (Evaluation criterion: Visual Clarity & Rigor).
+Abstract
+Fish farming is a major part of Bangladesh's economy, producing over 3.5% of the national GDP and supplying 60% of animal protein. However, fish farmers in Bangladesh face two major dangers: sudden, unmonitored pond water deterioration leading to massive fish mortality, and seasonal monsoon river flooding that overtops pond dikes and washes away entire fish stocks. Most small-scale farmers still rely on manual observation and occasional water test kits, which fail to provide timely warnings. To address these problems, this capstone project presents AquaShield, an integrated, low-cost IoT system combined with a three-tier predictive Machine Learning (ML) decision-support engine.
+The physical edge node consists of an ESP32 microcontroller connected to analog pH (pH-4502C, powered at 3.3V to protect the ESP32 ADC pins), Total Dissolved Solids (TDS), NTC thermistor temperature, and ultrasonic water-level sensors (HC-SR04). The firmware runs an autonomous Finite State Machine (FSM) every 30 seconds to control a 2-channel optoisolated relay module driving a drain pump and a refill pump, together with an automated servo fish feeder. The edge node includes offline fail-safe logic: if Wi-Fi or cloud connections drop, local safety rules continue to operate and readings are saved to flash memory. Data is synchronized to a Firebase Realtime Database, which updates a live web dashboard that also displays alert banners, while the ML models are served by a Python FastAPI backend.
+The machine learning subsystem includes three models: (1) River water-level forecasting at Bahadurabad transit on the Jamuna River, trained on 15 years (2008--2022) of BWDB hydrometric data and ERA5 catchment rainfall. Using Leave-One-Year-Out (LOYO) cross-validation across 1 to 14-day lead times, regularized Linear Regression achieved a Nash-Sutcliffe Efficiency (NSE) of 0.985 and RMSE of 0.308 m on unseen 2020--2022 test years, beating tree models because linear models extrapolate flood peaks without hitting a ceiling; because the models smooth flood peaks and miss some flood days, the dashboard warning threshold is set 0.3 m to 0.5 m below the 19.05 m Danger Level. (2) Short-horizon pond TDS forecasting (+60 minutes) using rolling averages, where Linear Regression (MAE: 7.05 ppm, R²: 0.888) outperformed tree ensembles that overfit sensor noise, verified using SHAP. (3) Unsupervised multivariate anomaly detection using Isolation Forest and sensor rate-of-change deltas, which detects dangerous multi-parameter conditions (such as pH 8.2 at 32°C creating lethal ammonia gas) that bypass single-parameter threshold limits. Built for under 7,200 BDT (~\$60), AquaShield provides an affordable, dependable decision-support system for fish farmers in Bangladesh.
+Keywords: Internet of Things (IoT), Water Quality Monitoring, River Flood Early Warning, Machine Learning, Explainable AI (SHAP).
+Preface
+This Bachelor of Science (B.Sc.) capstone project report describes the engineering design, embedded hardware prototyping, cloud software development, and machine learning experiments conducted in the Department of Computer Science and Engineering (CSE), Faculty of Science and Engineering, at the University of Information Technology and Sciences (UITS), Dhaka, Bangladesh.
+The project is structured into six chapters, summarized below:
+Chapter 1 (Introduction): Introduces aquaculture in Bangladesh, explains the problems of silent water quality deterioration and monsoon river flooding (motivation), defines the aims and technical objectives of AquaShield, outlines the project challenges and scope, and lists the main contributions.
+Chapter 2 (Background Studies): Explains key pond water quality parameters (pH, TDS, temperature, ammonia), reviews monsoon flood patterns in the Jamuna basin, surveys existing IoT aquaculture systems, reviews machine learning in hydrology, and summarizes technical gaps.
+Chapter 3 (Methodology): Presents the overall 5-tier architecture, hardware sensor equations and the 3.3V pH sensor design, edge FSM actuation rules, offline fail-safe logic, Firebase cloud telemetry and the FastAPI backend, the methodology of the three ML models, and validation protocols.
+Chapter 4 (Implementation): Details the physical hardware build, power supply design, ESP32 C++ firmware with ADC oversampling, Firebase Realtime Database and Python FastAPI cloud services, Python ML pipelines, the web dashboard, and web dashboard alert banners.
+Chapter 5 (Result Analysis and Comparison): Presents laboratory sensor calibration results, Model 1 river flood forecasting performance across 1 to 14 days with peak extrapolation analysis and the dashboard safety buffer, Model 2 TDS forecasts with SHAP plots, Model 3 multivariate anomaly isolation, system latency benchmarks, and technical defense insights.
+Chapter 6 (Conclusion & Future Work): Summarizes the project conclusion and limitations, and outlines future improvements such as TinyML and LoRaWAN long-range networking.
+Appendices & References: Appendix A provides complete pinout connections and REST API routes. References lists 25 formal IEEE citations, followed by the institutional Plagiarism Report placeholder.
+Table of Contents
+Table of Contents
+Declaration
+Approval
+Acknowledgement
+Justification Report
+CO-PO Mapping
+Justification of PO through COs
+Complex Engineering Problem (CEP) Justification
+Range of Complex Engineering Activities (CEA) Justification
+Mapping to PO10 (Communication)
+Abstract
+Preface
+Table of Contents
+List of Figures
+List of Tables
+Abbreviations and Symbols
+Chapter 1: Introduction
+1.1 Introduction
+1.2 Motivation
+1.3 Aims and Objectives
+1.4 Challenges
+1.5 Contribution
+1.6 Conclusion
+Chapter 2: Background Studies
+2.1 Introduction
+2.2 Aquaculture Challenges and Water Quality Dynamics in Bangladesh
+2.3 Monsoon Flooding Risks and Early Warning Needs
+2.4 Review of Existing IoT Aquaculture Monitoring Systems
+2.5 Machine Learning in Hydrological Forecasting & Water Quality Prediction
+2.6 Comparative Analysis of Related Works and Technical Gaps
+2.7 Conclusion
+Chapter 3: Methodology
+3.1 Introduction
+3.2 Overall System Architecture and Telemetry Pipeline
+3.3 Hardware Design and Edge Sensing Layer
+3.4 Local Edge Control Logic, Fail-Safe Automation, and Actuator Drivers
+3.5 Cloud Telemetry, REST API, and Database Schema
+3.6 Machine Learning Subsystem Methodology
+3.7 Model Validation Protocols (LOYO CV and Chronological Splitting)
+3.8 Conclusion
+Chapter 4: Implementation
+4.1 Introduction
+4.2 Hardware Fabrication, Circuit Wiring, and Power Supply Setup
+4.3 ESP32 Firmware Development & Local Sensing Pipeline
+4.4 Cloud Backend & Database Service Implementation
+4.5 Machine Learning Subsystem Implementation & Deployment Pipeline
+4.6 Web Dashboard & Sensor Calibration Interface Development
+4.7 Automated Alerting Subsystem & Web Dashboard Alert Banners
+4.8 Conclusion
+Chapter 5: Result Analysis and Comparison
+5.1 Introduction
+5.2 IoT Hardware Performance and Sensor Calibration Results
+5.3 Model 1 (River Flood Forecast) Experimental Evaluation
+5.4 Model 2 (Pond TDS Forecast) Results and SHAP Explainability
+5.5 Model 3 (Pond Anomaly Detection) Evaluation and Diagnostic Analysis
+5.6 Real-Time Actuation Latency, Cloud Throughput, and End-to-End Reliability
+5.7 Comprehensive Discussion & Technical Defense Insights
+5.8 Conclusion
+Chapter 6: Conclusion & Future Work
+6.1 Conclusion
+6.2 Future Works
+Appendix A: Circuit Schematic, Pin Mappings, and REST API Endpoints
+References
+Plagiarism Report
+List of Figures
+Fig. 3.1 High-level 5-tier cyber-physical architecture and catchment integration schematic of AquaShield
+Fig. 3.2 Leave-One-Year-Out (LOYO) cross-validation and strict holdout evaluation protocol
+Fig. 5.1 Correlation and physical lag dynamics between catchment rainfall and Bahadurabad river water level
+Fig. 5.2 Model Root Mean Squared Error (RMSE) vs. forecast lead time (1 to 14 days) across all evaluated algorithms
+Fig. 5.3 Flood season hydrographs: observed vs. predicted water levels during major historical monsoon flood years
+Fig. 5.4 Model 1 feature importance distribution shifting from autoregressive water-level lags to upstream rainfall sums
+Fig. 5.5 Final holdout model performance on unseen 2020--2022 monsoon seasons (+3 days lead horizon)
+Fig. 5.6 Model 2 performance comparison bar chart across MAE, RMSE, and R² metrics
+Fig. 5.7 Model 2 actual vs. predicted TDS time series over the held-out test dataset
+Fig. 5.8 SHAP feature importance summary plot explaining Model 2 TDS forecasts
+Fig. 5.9 Model 3 bivariate scatter plot (pH vs. TDS) highlighting detected multivariate anomalies
+Fig. 5.10 Model 3 anomaly detection timeline traced along continuous TDS sensor readings
+Fig. 5.11 Isolation Forest anomaly score distribution and 5% contamination decision threshold
+List of Tables
+Table 2.1 Water Quality Thresholds and Biological Tolerance for Major Farmed Fish Species
+Table 2.2 Comparative Feature Matrix of Existing Aquaculture Systems vs. AquaShield
+Table 3.1 Hardware Bill of Materials (BOM) and Cost Breakdown
+Table 3.2 Summary of Primary Hardware Pin Assignments on ESP32
+Table 3.3 Summary of Edge Finite State Machine (FSM) Actuation Rules
+Table 5.1 Sensor Calibration and Precision Evaluation Across Standard Laboratory Buffers
+Table 5.2 Bahadurabad Station Hydrological Dataset Summary (2008--2022)
+Table 5.3 Hyperparameter Search Grids and Selected Optimal Values for Model 1
+Table 5.4 Comprehensive LOYO Cross-Validation Performance Metrics (+1 Day Horizon)
+Table 5.5 Extreme Flood Season and Peak Error Evaluation Metrics
+Table 5.6 Final Holdout Evaluation Results on Unseen 2020--2022 Monsoon Seasons (+3 Days)
+Table 5.7 Model 2 Pond TDS Forecasting Performance Comparison (+60 Mins Horizon)
+Table 5.8 End-to-End Latency and Network Dropout Benchmark Results
+Table A.1 Complete Hardware Pinout and Bus Interfacing Specifications
+Table A.2 AquaShield REST API Endpoints Specification (Python FastAPI ML Backend)
+Abbreviations and Symbols
+Acronym / Symbol
+Full Meaning / Definition
+ADC
+Analog-to-Digital Converter
+AI
+Artificial Intelligence
+API
+Application Programming Interface
+BAETE
+Board of Accreditation for Engineering and Technical Education
+BLE
+Bluetooth Low Energy
+BOM
+Bill of Materials
+BWDB
+Bangladesh Water Development Board
+CA
+Complex Activities
+CEA
+Complex Engineering Activities
+CEP
+Complex Engineering Problem
+CO
+Course Outcome
+CP
+Complex Problem
+CSE
+Computer Science and Engineering
+CSS
+Cascading Style Sheets
+CV
+Cross-Validation
+DC
+Direct Current
+DO
+Dissolved Oxygen
+ERA5
+ECMWF Reanalysis v5 Global Climate Dataset
+ESP32
+Espressif Systems 32-bit Wi-Fi/BLE Microcontroller
+FAR
+False Alarm Rate
+FFWC
+Flood Forecasting and Warning Centre (Bangladesh)
+FSM
+Finite State Machine
+GPIO
+General Purpose Input/Output
+HTML
+HyperText Markup Language
+HTTP
+Hypertext Transfer Protocol
+IDE
+Integrated Development Environment
+IEEE
+Institute of Electrical and Electronics Engineers
+IoT
+Internet of Things
+KP
+Knowledge Profile
+LOYO
+Leave-One-Year-Out Cross-Validation
+LSTM
+Long Short-Term Memory Neural Network
+MAE
+Mean Absolute Error
+MCU
+Microcontroller Unit
+ML
+Machine Learning
+NSE
+Nash-Sutcliffe Efficiency
+NTC
+Negative Temperature Coefficient
+NVS
+Non-Volatile Storage
+pH
+Potential of Hydrogen (Acidity/Basicity Measure)
+PO
+Program Outcome
+POD
+Probability of Detection (Hit Rate)
+PWM
+Pulse Width Modulation
+REST
+Representational State Transfer
+RHWL
+Recorded Highest Water Level
+RMSE
+Root Mean Squared Error
+R²
+Coefficient of Determination
+SDK
+Software Development Kit
+SHAP
+SHapley Additive exPlanations
+SPIFFS
+Serial Peripheral Interface Flash File System
+SVR
+Support Vector Regressor
+TDS
+Total Dissolved Solids (measured in ppm)
+UITS
+University of Information Technology and Sciences
+Wi-Fi
+Wireless Fidelity (IEEE 802.11 b/g/n)
+WP
+Workplace / Complex Problem Profile Attribute
+XGBoost
+Extreme Gradient Boosting
+Chapter 1: Introduction
+1.1 Introduction
+In Bangladesh, fish farming is one of the most vital agricultural sectors. It contributes more than 3.5% to the national Gross Domestic Product (GDP) and provides roughly 60% of the animal protein consumed across the country [1], [2]. Over 18 million people depend on fisheries and aquaculture for their daily livelihood. Over the last two decades, fish farming has shifted from traditional low-density ponds to high-density commercial aquaculture. Species like Rohu (Labeo rohita), Catla (Gibelion catla), Pangas (Pangasius hypophthalmus), and Tilapia (Oreochromis niloticus) are widely farmed in key aquaculture districts such as Mymensingh, Bogura, and Jamalpur.
+While high-density stocking increases fish production, it also creates serious environmental risks in the pond. Fish waste and uneaten feed accumulate quickly on the pond bed. When water temperature rises or pH levels shift, harmless ammonium ions turn into toxic unionized ammonia gas (NH3), which can kill an entire pond of fish overnight. At the same time, because Bangladesh is a low-lying river delta, fish farms in river basins face recurring monsoon floods. Flash floods from the Jamuna River often overtop pond dikes, allowing mature fish to escape into open floodwaters and wiping out a farmer's investment in a single day [4]. To solve both of these problems, our team designed AquaShield---an integrated IoT and Machine Learning decision-support and automation system built specifically for fish farmers in Bangladesh.
+1.2 Motivation
+Problem Statement. Small- and medium-scale fish farmers in Bangladesh struggle with four main practical challenges:
+Lack of Continuous Real-Time Water Quality Monitoring: Water quality parameters like pH, TDS, and temperature change throughout the day and night. Farmers usually check water only by looking at its color or doing manual tests once a week. This means they only discover water toxicity after fish have already started dying.
+No Automated Protective Action: Most farms do not have automated controls. If a farmer is away or asleep when oxygen drops or water gets dirty, nobody is there to turn on the pump in time.
+No Data History for Decision Making: Farmers do not have recorded sensor history. Without real data, farmers frequently overfeed, which pollutes the pond bed and drives up Total Dissolved Solids.
+Vulnerability to Monsoon River Floods: During the monsoon season, sudden river surges from upstream catchments in India travel down the Jamuna River. Farmers receive no localized advance warnings, leaving them unable to raise perimeter netting or harvest their fish before floodwaters submerge the pond.
+Our motivation was to build a reliable, low-cost system under 7,200 BDT (~\$60 USD). By pairing an ESP32 microcontroller with standard water sensors and three practical machine learning models, AquaShield automates day-to-day pond tasks (draining, refilling, and feeding) and gives farmers advance warning of water hazards and river floods.
+1.3 Aims and Objectives
+The main aim of this project is to develop and test AquaShield as an affordable, cyber-physical aquaculture management and flood warning system. Our specific technical objectives were:
+Build a Multi-Sensor IoT Node: Assemble a hardware prototype using an ESP32 microcontroller connected to analog pH, analog TDS, NTC thermistor temperature, and HC-SR04 ultrasonic water-level sensors, reading data every 30 seconds.
+Program Local Edge Control Rules with Offline Fail-Safe: Write a Finite State Machine in C++ on the ESP32 to control a 2-channel relay module for the drain pump and refill pump, and a servo-based fish feeder. If the internet disconnects, the ESP32 continues to run safety rules locally and saves readings to flash memory.
+Set Up a Cloud Data Pipeline and Dashboard Alerts: Use the Firebase Realtime Database for cloud telemetry and live dashboard updates, a Python FastAPI backend for the machine learning models, and web dashboard alert banners for emergency alerts.
+Develop Model 1 (River Flood Forecast): Train machine learning models using 15 years (2008--2022) of BWDB water level records and ERA5 rainfall data for the Bahadurabad station on the Jamuna River to forecast river levels 1 to 14 days ahead, evaluated with Leave-One-Year-Out validation.
+Develop Model 2 (Pond TDS Forecast): Predict pond Total Dissolved Solids 60 minutes ahead (t+1h) using rolling averages, comparing linear models with tree models and explaining results with SHAP.
+Develop Model 3 (Pond Anomaly Detection): Use the Isolation Forest algorithm with sensor rate-of-change deltas to detect unusual water conditions (like dangerous pH + temperature combinations) without needing labeled disease datasets.
+Build an Interactive Web Dashboard and Calibration Page: Create a web dashboard showing live sensor dials, a composite Pond Health Index (0--100), historical trend charts, manual pump switches, and an easy two-point pH calibration wizard.
+1.4 Challenges
+Project Scope and Limitations. Our prototype includes the physical sensor circuit, ESP32 firmware, cloud backend (Firebase Realtime Database and a Python FastAPI ML service), live web dashboard with alert banners, and three machine learning models. Model 1 is calibrated for the Bahadurabad transit station on the Jamuna River, and Models 2 and 3 use pond IoT sensor telemetry. The prototype uses 2.4 GHz Wi-Fi for telemetry; remote rural ponds without Wi-Fi would require a GSM SIM module. The pH probe requires manual cleaning every 2 to 4 weeks to remove biofilm. AquaShield is an environmental monitoring system and does not diagnose fish diseases directly.
+Hardware Challenges. Key hardware challenges encountered during the build---protecting the ESP32 ADC pins from the standard 5V supply of the pH sensor module, and supply voltage drops that restarted the ESP32 when the pumps switched on---are described in Section 3.3 and Section 4.2.
+1.5 Contribution
+Affordable Edge Node: Built a low-cost (<\$60) multi-sensor edge node with optical relay isolation and ADC noise filtering.
+Offline Edge Fail-Safe: Programmed local FSM rules ensuring continuous pump control and flash buffering during internet outages.
+Dual-Horizon Protection: Connected river flood forecasting with pond automation, giving farmers 3 to 7 days advance warning.
+Leakage-Free Flood Validation: Evaluated models using LOYO CV, proving linear extrapolation beats decision trees during peak floods.
+Unsupervised Anomaly Detection: Detected multi-parameter toxic conditions (ammonia spikes) without requiring labeled failure datasets.
+1.6 Conclusion
+Organization of the Report. This report is organized into six chapters: Chapter 1 introduces the project background and goals; Chapter 2 reviews literature on pond water chemistry, flood hazards, and IoT systems; Chapter 3 describes our system architecture, hardware design, and ML methodology; Chapter 4 explains the implementation details; Chapter 5 presents sensor calibrations, ML evaluation results, and defense insights; and Chapter 6 concludes the report with future recommendations.
+This chapter outlined the importance of fish farming in Bangladesh, the problems of water pollution and river floods, and our goals in building AquaShield. The next chapter reviews background studies and related works.
+Chapter 2: Background Studies
+2.1 Introduction
+To build an effective pond monitoring and flood warning system, it is important to understand the biological water limits for fish, the patterns of monsoon river flooding in Bangladesh, and what existing IoT and machine learning research has accomplished. This chapter reviews these areas and highlights the technical gaps our project addresses.
+2.2 Aquaculture Challenges and Water Quality Dynamics in Bangladesh
+Fish are cold-blooded animals, meaning their health, growth, and survival depend directly on water temperature and chemical parameters. Four main water parameters must be kept within safe boundaries [5], [6]:
+pH (Potential of Hydrogen). Safe range is 6.5 to 8.5. Low pH (<6.0) causes gill irritation and body slime. High pH (>8.8) causes gill damage and turns harmless ammonium into lethal unionized ammonia gas.
+Total Dissolved Solids (TDS). Safe range is 150 to 450 ppm. High TDS (>600 ppm) indicates excess unconsumed feed, organic waste, or fertilizer runoff, causing osmotic stress and clogging gills.
+Water Temperature. Optimal range is 25.0°C to 30.0°C. Water holds less dissolved oxygen when it gets hot (>32°C), while fish consume more oxygen due to higher metabolism. High heat also multiplies ammonia toxicity.
+Pond Water Level. Target depth is 80 to 150 cm. If water level is too low, the pond heats up quickly; if it is too high during heavy rains, pond dikes can break and fish escape.
+Table 2.1. Water Quality Thresholds and Biological Tolerance for Major Farmed Fish Species
+Parameter
+Optimal Range
+Stress Threshold (Warning)
+Lethal Limit (Critical)
+Impact on Fish Health
+pH
+6.5 -- 8.5
+< 6.2 or > 8.8
+< 5.0 or > 9.5
+Gill burns, respiratory failure, ammonia toxicity spike
+TDS (ppm)
+150 -- 450
+450 -- 600
+> 800
+Osmotic stress, gill clogging, excessive organic waste
+Temperature (°C)
+25.0 -- 30.0
+30.0 -- 33.0 or < 20.0
+> 35.0 or < 15.0
+Low oxygen, metabolic collapse, stopped feeding
+Water Level (cm)
+80 -- 150
+< 60 (Low) / > 160 (High)
+< 40 (Dry) / > 180 (Overflow)
+Fast temperature changes, dike overtopping, fish escape
+2.3 Monsoon Flooding Risks and Early Warning Needs
+Over 92% of the catchment area of Bangladesh's rivers lies outside the country. During the monsoon (June to October), heavy rainfall in the Himalayas and Meghalaya hills discharges down into the Brahmaputra-Jamuna river system. At the Bahadurabad transit gauge in Jamalpur, water levels frequently cross the official 19.05m Danger Level. In major flood years like 2017, 2019, and 2020, water levels passed 20.50m. In 2020 alone, over 40,000 hectares of commercial fish ponds were submerged, causing financial losses of over 500 crore BDT (\$45M USD) [3]. National agency bulletins give macro basin forecasts, but fish farmers need a 3 to 7-day advance warning for their local river station so they have enough time to set up high nylon nets around their pond dikes or harvest mature fish early.
+2.4 Review of Existing IoT Aquaculture Monitoring Systems
+Early IoT systems used simple Arduino boards with ZigBee or Bluetooth, but their range was too short and they did not control any pumps. Later systems used ESP8266 or ESP32 boards streaming to platforms like ThingSpeak or Blynk. However, these systems rely completely on continuous internet: if Wi-Fi drops, all monitoring and automatic pump actions stop. Commercial industrial PLC systems cost thousands of dollars (\$2,000--\$10,000) and are completely out of reach for small fish farmers in Bangladesh.
+2.5 Machine Learning in Hydrological Forecasting & Water Quality Prediction
+In hydrology, data-driven machine learning models (Ridge [17], SVR, Random Forest [16], XGBoost [15]) offer a practical alternative to complex physics simulations. However, many published studies make a major mistake: they use standard random K-Fold cross-validation on time-series data. Shuffling data points leaks future days into the training set, giving falsely high accuracy scores. In addition, decision tree ensembles (Random Forest and XGBoost) cannot predict values higher than the maximum number in their training data, meaning they underestimate unprecedented flood peaks. In pond water monitoring, supervised ML models fail because farmers do not have labeled 'bad water' datasets. An unsupervised model like Isolation Forest [13] is needed to detect unusual multi-sensor combinations without needing manual labels.
+2.6 Comparative Analysis of Related Works and Technical Gaps
+Table 2.2 compares AquaShield with eight previous systems from recent research and industry:
+Table 2.2. Comparative Feature Matrix of Existing Aquaculture Systems vs. AquaShield
+System / Research Study
+Microcontroller
+Key Sensors
+Local Auto Actuation
+Offline Fail-Safe
+River Flood Forecast
+Pond ML & Anomaly Detection
+Cost (USD)
+Saha et al. (2018) [7]
+Arduino Uno
+pH, Temp, DO
+No (Alerts Only)
+No
+No
+No
+\$120
+Raju et al. (2020) [8]
+Raspberry Pi
+pH, Temp, Level
+Yes (Pumps)
+Partial
+No
+No
+\$180
+Hasan et al. (2021) [9]
+ESP8266
+pH, TDS, Temp
+No
+No
+No
+Basic Thresholds
+\$75
+Islam et al. (2022) [10]
+ESP32
+pH, Temp, Turbidity
+Yes (Aerator)
+No
+No
+Simple Linear Reg
+\$95
+Chen et al. (2023) [11]
+Industrial PLC
+Optical DO, pH, ORP
+Yes (Multi-Relay)
+Yes
+No
+LSTM DO Forecast
+\$1,500+
+Ahmed et al. (2024) [12]
+ESP32
+pH, TDS, Level
+Yes (Drain/Refill)
+No
+No
+No
+\$85
+Commercial AquaMaster
+Proprietary
+Full Water Suite
+Full PLC Control
+Yes
+No
+Proprietary Rules
+\$3,500+
+AquaShield (Our Work)
+ESP32 (Dual Core)
+pH, TDS, Temp, Ultrasonic
+Yes (Drain, Refill, Feeder)
+Yes (Full Edge FSM + Flash Buffer)
+Yes (BWDB LOYO CV +1 to +14d)
+Yes (Model 2 TDS + Model 3 IsoForest)
+< \$60
+Technical Gaps We Resolved. (1) Connected macro river flood forecasting with micro pond automation; (2) Created local edge FSM rules so the system continues running pumps and buffering data even during internet dropouts; (3) Used Leave-One-Year-Out validation to avoid lookahead leakage; and (4) Used Isolation Forest with rate-of-change deltas to catch dangerous multi-sensor chemical combinations.
+2.7 Conclusion
+This chapter reviewed fish water tolerances, monsoon flood patterns, existing IoT platforms, and ML models. The identified gaps provide the justification for our methodology described in Chapter 3.
+Chapter 3: Methodology
+3.1 Introduction
+This chapter describes how we designed AquaShield. It explains our 5-tier architecture, sensor models and equations, edge control rules, cloud data pipeline, mathematical formulations for the three machine learning models, and validation methods.
+3.2 Overall System Architecture and Telemetry Pipeline
+We organized AquaShield into five connected tiers: (1) Physical Sensors and Actuators at the pond; (2) Edge Computing on the ESP32 running local control rules; (3) Cloud Telemetry using the Firebase Realtime Database; (4) Machine Learning Analytics running our three prediction models through a Python FastAPI backend; and (5) Presentation Tier consisting of our live web dashboard and its alert banners. The overall architecture is shown in Fig. 3.1.
+Fig. 3.1 High-level 5-tier cyber-physical architecture and catchment integration schematic of AquaShield
+Explanation: Shows how data flows from pond sensors and river stations, through the ESP32 and the Firebase Realtime Database, to our machine learning models (served by the FastAPI backend), live dashboard, and dashboard alert banners.
+3.3 Hardware Design and Edge Sensing Layer
+We chose the ESP32 (WROOM-32) board because it has a dual-core 240 MHz processor, built-in 2.4 GHz Wi-Fi, and 4 MB flash memory [22]. Core 0 handles Wi-Fi and Firebase Realtime Database synchronization, while Core 1 handles sensor readings and relay control. Our sensors and formulas include:
+pH Sensor (pH-4502C). Analog probe using two-point calibration, where S is the sensor slope:
+\mathrm{pH} = 7.0 + \frac{V_{cal,7} - V_{out}}{S} \tag{3.1}
+TDS Sensor. Measures electrical conductivity with AC excitation. Compensated for temperature:
+V_{comp} = \frac{V_{adc}}{1.0 + 0.02\,(T - 25.0)} \tag{3.2}
+NTC Thermistor Temperature Sensor. Analog thermistor read through a voltage divider with a 4.7 kΩ pull-down resistor.
+HC-SR04 Water Level Sensor. Ultrasonic sensor measuring distance:
+\mathrm{Water\_Level} = \mathrm{Pond\_Depth} - \frac{t_{echo}\, v_{sound}}{2} \tag{3.3}
+3.3V pH Sensor Power Design and Calibration Tool. The pH-4502C module is normally powered at the standard 5V. We powered it at 3.3V instead, to protect the ESP32 ADC pins from burning out. The TDS probe also runs at 3.3V logic. To calibrate the pH sensor, we built a custom software calibration tool that uses household reference solutions: vinegar (pH 2.4) and baking soda solution (pH 8.3). The tool is part of the web dashboard (Section 4.6), and the resulting calibration values are saved in the ESP32 non-volatile storage (Section 4.3).
+Table 3.1. Hardware Bill of Materials (BOM) and Cost Breakdown
+Component Name
+Model / Specification
+Quantity
+Unit Cost (BDT)
+Unit Cost (USD)
+Primary Function
+ESP32 Microcontroller
+ESP32 WROOM-32 (Wi-Fi/BLE)
+1
+650 BDT
+\$5.50
+Central processing & Wi-Fi communication
+pH Sensor Kit
+pH-4502C + Glass Probe
+1
+1,850 BDT
+\$15.50
+Measures pond water acidity/alkalinity
+TDS Sensor Kit
+Analog AC Probe Module
+1
+750 BDT
+\$6.30
+Measures dissolved solids and water purity
+Temperature Sensor
+NTC Thermistor (waterproof probe)
+1
+180 BDT
+\$1.50
+Measures water temp for compensation
+Ultrasonic Sensor
+HC-SR04 Transducer
+1
+120 BDT
+\$1.00
+Tracks pond water depth without touching water
+2-Channel Relay
+5V Optocoupler Isolated, Active-LOW
+1
+280 BDT
+\$2.35
+Switches 12V pumps safely
+Drain Pump
+12V DC Submersible (240 L/h)
+1
+650 BDT
+\$5.45
+Drains excess water during heavy rain or high TDS
+Refill Pump
+12V DC Submersible (240 L/h)
+1
+650 BDT
+\$5.45
+Adds fresh water when pond level gets low
+Servo Feeder
+SG90 Micro Servo (PWM)
+1
+140 BDT
+\$1.20
+Dispenses fish feed pellets automatically
+Power Supply & Buck
+12V 5A Adapter + LM2596
+1
+800 BDT
+\$6.70
+Powers 12V pumps and regulates 5V for ESP32
+Enclosure & Wiring
+IP65 Waterproof Box & Cables
+1
+500 BDT
+\$4.20
+Protects electronics from rain and moisture
+**Total Bill of Materials**
+Complete Hardware Node
+-
+**6,570 BDT**
+**\$55.15**
+Complete assembled prototype system
+Table 3.2. Summary of Primary Hardware Pin Assignments on ESP32
+ESP32 GPIO Pin
+Interfaced Component
+Signal Category
+Electrical Characteristics / Protocol
+GPIO 34 (ADC1_CH6)
+pH Sensor (pH-4502C Po)
+Analog Input
+0.0V -- 3.3V DC (ADC1 pin, safe with Wi-Fi)
+GPIO 35 (ADC1_CH7)
+TDS Sensor (Analog Out)
+Analog Input
+0.0V -- 2.3V DC (ADC1 pin, safe with Wi-Fi)
+ADC pin [GPIO number to be confirmed]
+NTC Thermistor (Temperature)
+Analog Input
+Voltage divider with 4.7 kΩ pull-down resistor, 3.3V DC
+GPIO 5
+Ultrasonic Trig Pin
+Digital Output
+10 μs TTL trigger pulse
+GPIO 18
+Ultrasonic Echo Pin
+Digital Input
+TTL pulse-width return via 1kΩ/2kΩ divider
+GPIO 19
+Relay IN1 (Drain Pump)
+Digital Output
+Active-LOW optoisolated relay driver
+GPIO 21
+Relay IN2 (Refill Pump)
+Digital Output
+Active-LOW optoisolated relay driver
+GPIO 23
+Servo Motor (Feeder)
+PWM Output
+50 Hz PWM servo pulse (1.0 ms -- 2.0 ms)
+3.3V
+pH Sensor (pH-4502C) & TDS Sensor
+Sensor Power Rail
+3.3V supply instead of the standard 5V, protecting the ESP32 ADC pins
+5V & GND
+Relay Module & Servo
+Power Rails
+Regulated 5.0V DC from LM2596 buck converter
+3.4 Local Edge Control Logic, Fail-Safe Automation, and Actuator Drivers
+We programmed an autonomous Finite State Machine (FSM) directly inside the ESP32. It checks conditions every 30 seconds and controls the pumps locally, so protection never stops even if the internet goes down (Table 3.3):
+Table 3.3. Summary of Edge Finite State Machine (FSM) Actuation Rules
+Rule ID
+Monitored Condition
+Trigger Condition
+Automated Local Action
+Safety Cut-off / Hysteresis
+Rule 1
+Pond Overflow Risk
+Water Level >= 85 cm
+Turn on Drain Pump (Relay 1 ON)
+Turn off when level drops below 75 cm
+Rule 2
+Pond Water Depletion
+Water Level <= 40 cm
+Turn on Refill Pump (Relay 2 ON)
+Turn off when level rises above 55 cm
+Rule 3
+High Dissolved Waste
+TDS >= 600 ppm
+Execute Partial Water Exchange
+Drain for 5 mins, then refill for 5 mins
+Rule 4
+Scheduled Feeding
+Time = 08:00 or 16:00
+Rotate Feeder Servo
+Gated: Paused if Temp < 18°C or Temp > 34°C
+Rule 5
+Acidic / Alkaline Water
+pH < 6.2 or pH > 8.8
+Show Alert Banner on Web Dashboard
+Displays immediate alert to farmer
+Offline Fail-Safe. If Wi-Fi disconnects, the ESP32 buffers up to 2,000 readings in SPIFFS flash memory (>16 hours of data). When Wi-Fi reconnects, it automatically sends all buffered readings to the cloud database with zero lost data.
+3.5 Cloud Telemetry, REST API, and Database Schema
+The ESP32 synchronizes sensor data to the Firebase Realtime Database every 5 minutes using the Firebase ESP32 Client SDK. The Firebase Realtime Database stores the live sensor telemetry and the pump command states, and provides sub-second latency, so the web dashboard shows live updates without browser page refreshing. The three machine learning models are hosted by a Python FastAPI (uvicorn) backend that the web dashboard queries through a REST API.
+3.6 Machine Learning Subsystem Methodology
+We built three distinct machine learning models to solve specific problems:
+Model 1: River Water-Level Forecasting (Bahadurabad Station). Predicts the river water level in meters at Bahadurabad transit station on the Jamuna River across four lead horizons: +1 day, +3 days, +7 days, and +14 days. Sourced from 15 years (2008--2022) of BWDB records [21] and ERA5 catchment rainfall [20]. Features include past river levels [WL(t-1), WL(t-2), WL(t-3), WL(t-7)], water-level rate-of-change deltas, 3-day and 7-day cumulative catchment rainfall, and seasonal harmonics. Because the models smooth out flood peaks, warnings on the dashboard are issued with a safety buffer below the official Danger Level (Section 5.3).
+Model 2: Pond TDS Forecasting (+60 Minutes Ahead). Predicts pond TDS 60 minutes ahead (t+1h) using IoT telemetry resampled to 1-hour intervals. Features include 12-hour sensor lags and 6-hour rolling averages to smooth sensor noise. We compared Linear Regression, Random Forest [16], and XGBoost [15], and used SHAP [14] to explain feature contributions.
+Model 3: Unsupervised Pond Water-Quality Anomaly Detection. Detects abnormal water conditions without needing labeled disease data. We used Isolation Forest [13] with a 5% contamination factor on sensor values and hourly deltas [pH, TDS, Temp, ΔpH, ΔTDS, ΔTemp]. This catches multivariate hazards (such as pH 8.2 combined with 32°C water temperature producing lethal ammonia gas) that look normal on single-parameter thresholds.
+3.7 Model Validation Protocols (LOYO CV and Chronological Splitting)
+To prevent future data leakage, Model 1 used Leave-One-Year-Out (LOYO) cross-validation across 12 annual folds (2008--2019), keeping 2020--2022 as an untouched test set. Model 2 used a chronological 70% train, 15% validation, and 15% test split (Fig. 3.2).
+Fig. 3.2 Leave-One-Year-Out (LOYO) cross-validation and strict holdout evaluation protocol
+Explanation: Shows how data was split by full calendar years: 12 folds (2008--2019) for model tuning, followed by testing on the untouched 2020--2022 test years.
+We evaluated our models using the standard error metrics given in Eq. (3.4) to Eq. (3.7) [19]:
+\mathrm{RMSE} = \sqrt{\frac{1}{N}\sum \left(y_i - \hat{y}_i\right)^2} \tag{3.4}
+\mathrm{NSE} = 1.0 - \frac{\sum \left(y_i - \hat{y}_i\right)^2}{\sum \left(y_i - \bar{y}_{obs}\right)^2} \tag{3.5}
+\mathrm{POD} = \frac{\mathrm{Hits}}{\mathrm{Hits} + \mathrm{Misses}} \tag{3.6}
+\mathrm{FAR} = \frac{\mathrm{False\_Alarms}}{\mathrm{Hits} + \mathrm{False\_Alarms}} \tag{3.7}
+3.8 Conclusion
+This chapter explained our hardware circuitry, control logic, cloud pipeline, and ML formulas. Chapter 4 describes how we implemented these designs in practice.
+Chapter 4: Implementation
+4.1 Introduction
+This chapter describes how we physically built and programmed AquaShield. We divided our 3-member team into clear responsibilities: Srabon handled circuit fabrication, sensor connections, and power management; Mahfuz integrated the ESP32 with the Firebase Realtime Database, designed the vanilla HTML/JavaScript/CSS web dashboard, and built the Firebase analytics historical charting; and Hrithik built the Python FastAPI microservices, trained and evaluated the three machine learning models, implemented LOYO cross-validation, and performed the SHAP explainability analysis.
+4.2 Hardware Fabrication, Circuit Wiring, and Power Supply Setup
+We assembled the prototype inside an IP65 waterproof outdoor box. When testing 12V submersible pumps, we initially noticed that turning on a pump caused an electrical voltage drop that restarted the ESP32. To fix this, we designed a dual-rail power circuit: a 12V 5A DC adapter powers the pumps directly, while an LM2596 step-down buck converter steps the voltage down to a stable 5.0V DC for the ESP32, relay module, servo, and ultrasonic sensor, filtered with a 470 μF capacitor. We also connected 1N4007 diodes across the pump motor terminals to safely absorb inductive voltage spikes when pumps turn off.
+Sensors were connected to ADC1 pins on the ESP32 (pH to GPIO 34 and TDS to GPIO 35), because ADC2 cannot be used when Wi-Fi is active. The pH-4502C module and the TDS probe were powered at 3.3V instead of the standard 5V to protect the ESP32 ADC pins (Section 3.3). The NTC thermistor temperature probe was wired as a voltage divider with a 4.7 kΩ pull-down resistor. The HC-SR04 ultrasonic sensor echo line was stepped down from 5V to 3.3V using a 1kΩ/2kΩ resistor divider on GPIO 18 to protect the microcontroller input pin.
+4.3 ESP32 Firmware Development & Local Sensing Pipeline
+We wrote our firmware in C++ using the Arduino core, with the Firebase ESP32 Client SDK for direct cloud synchronization. We avoided delay() functions and used millis() timers so all tasks run smoothly. To reduce electrical noise on analog readings, the firmware takes 64 fast samples, sorts them, discards the highest and lowest 10%, and averages the rest. The two-point pH calibration numbers are saved in the ESP32 flash memory (NVS) so they stay saved even when powered off, and they can be updated from the web dashboard without re-flashing the hardware. The firmware evaluates our local control rules every 30 seconds and buffers data to SPIFFS flash memory during internet disconnects.
+4.4 Cloud Backend & Database Service Implementation
+Our cloud layer uses the Firebase Realtime Database, which stores live sensor telemetry and pump command states and pushes changes to the connected dashboard with sub-second latency. The machine learning backend is a Python FastAPI service (api_combined.py) run with uvicorn on a local Python server on Port 8000, and it hosts all three trained models.
+4.5 Machine Learning Subsystem Implementation & Deployment Pipeline
+We built our machine learning pipelines in Python using Scikit-learn [23], XGBoost, and SHAP. For Model 1 (River Flood Forecast), we cleaned 15 years of BWDB water levels, filled missing maintenance days using PCHIP interpolation, and created lag and rainfall features. We tested Ridge [17], Lasso [18], Random Forest [16], and XGBoost [15] using Leave-One-Year-Out validation. For Model 2 (TDS Forecast), we calculated 6-hour rolling statistics and trained regressions with SHAP explainability. For Model 3 (Anomaly Detection), we trained Isolation Forest on sensor deltas. The models were saved with Joblib and served through a lightweight FastAPI microservice.
+4.6 Web Dashboard & Sensor Calibration Interface Development
+We built a responsive web dashboard using vanilla HTML, CSS, and JavaScript, with Chart.js for the trend charts. Key features include: (1) Live dials for pH, TDS, temperature, and depth; (2) A composite Pond Health Index (0--100) calculated from all four parameters; (3) Interactive 24-hour and 7-day trend charts; (4) Manual override buttons to test the pumps; and (5) A guided pH calibration page that walks the user through the two-point calibration with vinegar (pH 2.4) and baking soda solution (pH 8.3) and saves new calibration values directly into the ESP32 memory.
+4.7 Automated Alerting Subsystem & Web Dashboard Alert Banners
+To alert farmers, we implemented web dashboard alert banners. We added a debounce filter: a parameter must stay abnormal for three consecutive readings (90 seconds) before triggering an alert, followed by a 30-minute cooldown to avoid repeated alerts. Alerts tell the farmer what went wrong, what automatic action the system took, and what they should check. When water returns to normal, a green resolution banner is shown.
+4.8 Conclusion
+This chapter described our circuit wiring, power design, firmware structure, cloud database, ML microservice, and user dashboard. Chapter 5 evaluates the real-world performance of these components.
+Chapter 5: Result Analysis and Comparison
+5.1 Introduction
+This chapter presents our experimental findings: laboratory sensor calibration, Model 1 river flood forecasting results across multiple horizons, Model 2 pond TDS forecasts with SHAP plots, Model 3 anomaly detection, and system speed and reliability tests.
+5.2 IoT Hardware Performance and Sensor Calibration Results
+We tested all sensors against certified laboratory references. After two-point calibration and 64-sample filtering, our pH probe achieved an error of ±0.05 pH (R² = 0.994). The TDS sensor stayed within 2.8% error across saline test solutions, the NTC thermistor temperature probe deviated by only ±0.15°C, and the ultrasonic sensor achieved ±0.4 cm depth precision (Table 5.1):
+Table 5.1. Sensor Calibration and Precision Evaluation Across Standard Laboratory Buffers
+Sensor Parameter
+Ground Truth Reference
+Pre-Calibration Error
+Post-Calibration Error (AquaShield)
+R² Score
+Drift (72h Test)
+pH (Acidity/Alkalinity)
+Standard Buffers (4.01, 6.86, 9.18)
+± 0.42 pH
+± 0.05 pH
+0.994
+± 0.03 pH
+TDS (ppm)
+Calibrated NaCl Reference (100--1000 ppm)
+± 8.5%
+± 2.8%
+0.989
+± 4.2 ppm
+Water Temperature (°C)
+Certified Mercury Thermometer
+± 0.85°C
+± 0.15°C
+0.998
+± 0.08°C
+Water Level (cm)
+Physical Metric Gauge Rule
+± 2.4 cm
+± 0.4 cm
+0.996
+± 0.2 cm
+5.3 Model 1 (River Flood Forecast) Experimental Evaluation
+We trained Model 1 on 15 years (2008--2022, 5,479 days) of daily water level data at the Bahadurabad transit station on the Jamuna River [21]. The danger level is 19.05m, with 467 recorded flood days (Table 5.2):
+Table 5.2. Bahadurabad Station Hydrological Dataset Summary (2008--2022)
+Hydrological Parameter / Attribute
+Empirical Dataset Value
+Operational Significance for Aquaculture
+Study Period
+2008-01-01 to 2022-12-31
+15 continuous calendar years of daily records
+Total Calendar Days
+5,479 days
+Statistically exhaustive sample of seasonal cycles
+Missing Daily Observations
+335 days (6.11%)
+Cleanly imputed using PCHIP interpolation
+Observed Gauge Range
+11.68 m to 21.16 m
+Wide dynamic range of hydraulic head
+Official Danger Level
+19.05 m
+Water overtopping primary earthen embankments
+Extreme Danger Level
+19.90 m
+Severe regional flooding across all surrounding ponds
+Recorded Highest Water Level (RHWL)
+20.63 m
+Historical peak flood inundation benchmark
+Total Flood Days (>= 19.05 m)
+467 days
+Extensive sample of high-water flood risk events
+The physical hydrologic lag between catchment rainfall and river water level is shown in Fig. 5.1.
+Fig. 5.1 Correlation and physical lag dynamics between catchment rainfall and Bahadurabad river water level
+Explanation: Proves the physical hydrologic lag: rainfall upstream in the Brahmaputra basin peaks several days before river water rises at Bahadurabad, justifying our 3-day and 7-day cumulative rainfall features.
+Table 5.3. Hyperparameter Search Grids and Selected Optimal Values for Model 1
+Algorithm Family
+Hyperparameter Search Space
+Selected Optimal Configuration
+Algorithmic Notes
+Persistence Baseline
+None (Heuristic)
+ΔWL = 0
+Assumes WL(t+h) = WL(t)
+Persistence + Trend
+None (Heuristic)
+Adds past 1-day rate of change
+Accounts for immediate momentum
+Ridge Regression
+alpha ∈ [0.01, 0.1, 1.0, 10.0, 100.0]
+alpha = 1.0
+L2 penalty, StandardScaler applied
+Lasso Regression
+alpha ∈ [0.001, 0.01, 0.1, 1.0]
+alpha = 0.01
+L1 sparse feature selection
+Random Forest Regressor
+n_estimators ∈ [50, 100, 200]; max_depth ∈ [5, 10, 15]
+n_estimators = 100, max_depth = 10
+Tree ensemble, random_state = 42
+XGBoost Regressor
+n_est ∈ [50, 100, 200]; depth ∈ [3, 5, 7]; lr ∈ [0.01, 0.05, 0.1]
+n_est = 100, depth = 5, lr = 0.05
+Gradient boosted trees, seed = 42
+Support Vector Regressor
+C ∈ [0.1, 1.0, 10.0]; epsilon ∈ [0.01, 0.1]
+C = 1.0, epsilon = 0.1
+RBF kernel, StandardScaler applied
+Fig. 5.2 Model Root Mean Squared Error (RMSE) vs. forecast lead time (1 to 14 days) across all evaluated algorithms
+Explanation: Shows how prediction error increases as we forecast further into the future. Linear models maintain lower error curves than tree models across short and medium lead times.
+Table 5.4. Comprehensive LOYO Cross-Validation Performance Metrics (+1 Day Horizon)
+Model Name
+Horizon
+RMSE (m)
+MAE (m)
+Bias (m)
+Nash-Sutcliffe (NSE)
+POD (Hit Rate)
+False Alarm Rate (FAR)
+Persistence Baseline
++1 Day
+0.1265
+0.0797
+-0.0009
+0.9972
+0.9280
+0.0670
+Persistence + Trend
++1 Day
+0.0953
+0.0546
++0.0001
+0.9984
+0.9413
+0.0381
+Linear Regression
++1 Day
+0.0843
+0.0498
+-0.0002
+0.9988
+0.9387
+0.0276
+Ridge Regression
++1 Day
+0.0843
+0.0497
+-0.0002
+0.9988
+0.9307
+0.0279
+Lasso Regression
++1 Day
+0.0889
+0.0518
++0.0000
+0.9986
+0.9360
+0.0277
+Random Forest
++1 Day
+0.0848
+0.0491
++0.0011
+0.9988
+0.9387
+0.0330
+XGBoost Regressor
++1 Day
+0.0847
+0.0491
++0.0004
+0.9988
+0.9360
+0.0331
+Support Vector Regressor
++1 Day
+0.0848
+0.0546
++0.0113
+0.9988
+0.9440
+0.0301
+Fig. 5.3 Flood season hydrographs: observed vs. predicted water levels during major historical monsoon flood years
+Explanation: Traces our predicted water levels (orange) against actual readings (blue). The model closely tracks flood peaks crossing the 19.05m Danger Level line.
+Key Defense Finding: Why Linear Regression Beat Tree Ensembles on Peak Floods. When looking at extreme floods above 19.9m (Table 5.5), Linear Regression achieved an RMSE of 0.1120m, outperforming Random Forest (0.1176m) and XGBoost (0.1156m):
+Table 5.5. Extreme Flood Season and Peak Error Evaluation Metrics
+Model
+Flood Season RMSE (m)
+Peak Error MAE (m)
+RMSE (<17m Low)
+RMSE (17-19m Med)
+RMSE (19-19.9m Danger)
+RMSE (>19.9m Extreme)
+Persistence Baseline
+0.1614
+0.0512
+0.0973
+0.1693
+0.1641
+0.2301
+Persistence + Trend
+0.1179
+0.1234
+0.0746
+0.1290
+0.1212
+0.1363
+Linear Regression
+0.1060
+0.0621
+0.0662
+0.1156
+0.1043
+0.1120
+Ridge Regression
+0.1061
+0.0623
+0.0659
+0.1156
+0.1047
+0.1119
+Random Forest
+0.1105
+0.0678
+0.0646
+0.1177
+0.1094
+0.1176
+XGBoost Regressor
+0.1093
+0.0677
+0.0647
+0.1169
+0.1103
+0.1156
+Why did this happen? Decision trees split data into boxes and predict the average of training points in that box. By design, a tree cannot predict any number higher than the highest value it saw during training. During a record-breaking flood, tree models hit a ceiling and underestimate the peak. Linear models, on the other hand, fit a continuous line (y = wx + b). When rainfall and water momentum surge together, the linear model extrapolates upward naturally, tracking unprecedented peaks accurately.
+Fig. 5.4 Model 1 feature importance distribution shifting from autoregressive water-level lags to upstream rainfall sums
+Explanation: For a 1-day forecast, yesterday's water level is most important. For 7-day and 14-day forecasts, the model shifts its reliance to 3-day and 7-day accumulated catchment rainfall.
+Holdout Test on Unseen 2020--2022 Monsoons. Tested on the untouched 2020--2022 monsoon seasons (+3 days lead horizon), Linear Regression achieved an NSE of 0.9851 and RMSE of 0.3082m, beating the baseline by +21.19% (Table 5.6 and Fig. 5.5):
+Table 5.6. Final Holdout Evaluation Results on Unseen 2020--2022 Monsoon Seasons (+3 Days)
+Evaluated Model
+Forecast Horizon
+Holdout Test Period
+RMSE (m)
+MAE (m)
+NSE Score
+Skill Score vs Baseline
+Persistence Baseline
++3 Days
+2020--2022 Monsoons
+0.3911
+0.2642
+0.9754
+0.00% (Reference)
+Linear Regression (AquaShield)
++3 Days
+2020--2022 Monsoons
+0.3082
+0.2035
+0.9851
++21.19% Improvement
+Fig. 5.5 Final holdout model performance on unseen 2020--2022 monsoon seasons (+3 days lead horizon)
+Explanation: Demonstrates accurate tracking across the extreme 2020 flood season, achieving an outstanding NSE of 0.9851.
+Safety Buffer for Missed Flood Days. The machine learning models smooth out flood peaks and therefore missed some flood days; the Probability of Detection in Table 5.4 is below 1.0 for every evaluated model. To compensate, we set the dashboard warning threshold 0.3 m to 0.5 m below the official 19.05 m Danger Level, so that a warning is raised before the forecast reaches the Danger Level.
+5.4 Model 2 (Pond TDS Forecast) Results and SHAP Explainability
+Model 2 predicts pond TDS 60 minutes ahead (t+1h). Table 5.7 compares algorithms on the 15% test set:
+Table 5.7. Model 2 Pond TDS Forecasting Performance Comparison (+60 Mins Horizon)
+Algorithm Evaluated
+MAE (ppm)
+RMSE (ppm)
+R² Score
+Key Practical Finding
+Persistence Baseline
+3.54
+11.46
+0.942
+Beats tree models; captures slow physical drift
+Linear Regression
+7.05
+15.90
+0.888
+Smooth regularized linear prediction without overfitting
+Random Forest Regressor
+17.25
+24.14
+0.742
+Overfit training sensor noise; stepped predictions
+XGBoost Regressor
+18.46
+25.56
+0.711
+Overfit high-frequency ADC electrical noise
+Fig. 5.6 Model 2 performance comparison bar chart across MAE, RMSE, and R² metrics
+Explanation: Clearly illustrates that the Persistence baseline (MAE: 3.54 ppm) and Linear Regression (MAE: 7.05 ppm) beat tree models.
+Why Persistence Beat XGBoost. In a large pond, water chemistry changes very slowly. Over 60 minutes, TDS drifts by only a few ppm. The Persistence baseline naturally captures this slow movement (R² = 0.942). Complex boosting models like XGBoost mistook small electrical ripples on sensor wires for real environmental trends, overfitting the noise and performing poorly on unseen test data (R² = 0.711). Linear Regression gave a reliable learned model (R² = 0.888) that smoothed through sensor noise.
+Fig. 5.7 Model 2 actual vs. predicted TDS time series over the held-out test dataset
+Explanation: Shows our predicted TDS trajectory (orange) closely tracking actual sensor readings (blue).
+Fig. 5.8 SHAP feature importance summary plot explaining Model 2 TDS forecasts
+Explanation: Proves that the 6-hour rolling average of TDS and the previous reading (TDS_t-1) drive over 85% of predictions, confirming the model follows real physical kinetics.
+5.5 Model 3 (Pond Anomaly Detection) Evaluation and Diagnostic Analysis
+A standard Z-score threshold flagged 55 outlier points, while Isolation Forest (5% contamination) detected 67 anomalies, successfully isolating dangerous multi-sensor combinations (such as pH 8.2 at 32°C creating toxic ammonia) that pass single-sensor threshold checks (Fig. 5.9 to Fig. 5.11):
+Fig. 5.9 Model 3 bivariate scatter plot (pH vs. TDS) highlighting detected multivariate anomalies
+Explanation: Normal pond conditions cluster densely (teal), while hazardous multi-parameter outliers (red) are isolated by the algorithm.
+Fig. 5.10 Model 3 anomaly detection timeline traced along continuous TDS sensor readings
+Explanation: Red markers flag sudden shock deltas (rapid fertilizer runoff or rain dilution) detected along the TDS time series.
+Fig. 5.11 Isolation Forest anomaly score distribution and 5% contamination decision threshold
+Explanation: Histogram of computed anomaly scores; the vertical dashed red line marks the 5% decision threshold separating normal from anomalous states.
+5.6 Real-Time Actuation Latency, Cloud Throughput, and End-to-End Reliability
+We tested system responsiveness and fail-safe robustness across 1,000 test cycles (Table 5.8):
+Table 5.8. End-to-End Latency and Network Dropout Benchmark Results
+Subsystem Operation / Benchmark
+Measured Average Latency
+Maximum Observed Latency
+Operational Reliability Standard
+Edge Sensor Sampling & ADC Multi-Sampling
+42 ms
+68 ms
+Deterministic 30-second cycle
+Local Fail-Safe Relay Actuation (Edge FSM)
+65 ms
+85 ms
+Instantaneous emergency protection
+Machine Learning Inference API Latency
+18 ms
+32 ms
+Microsecond REST model execution
+Offline Buffer Recovery (30-min simulated outage)
+100% sync
+100% sync
+60 buffered packets restored with zero loss
+5.7 Comprehensive Discussion & Technical Defense Insights
+Four Key Takeaways from Our Work. (1) Leave-One-Year-Out validation is essential for river data to avoid future data leakage; (2) Linear regression models extrapolate flood crests better than decision trees; (3) Isolation Forest detects combined hazards without needing pre-labeled failure datasets; and (4) SHAP provides transparency so farmers can trust automated alerts.
+5.8 Conclusion
+Our experiments verified all subsystems: calibrated sensors gave high accuracy; Model 1 forecasted floods with NSE = 0.985; Model 2 predicted TDS accurately with SHAP explainability; Model 3 caught multi-parameter hazards; and the edge node survived network dropouts with 100% data recovery.
+Chapter 6: Conclusion & Future Work
+6.1 Conclusion
+AquaShield successfully connects low-cost IoT automation with three practical machine learning models. It solves the real-world problems of silent pond water toxicity and monsoon flood devastation in Bangladesh, delivering an end-to-end solution built for under 7,200 BDT (~\$60 USD). The key research and engineering contributions of this work are listed in Section 1.5.
+Project Limitations.
+Sensor Bio-Fouling: Glass-bulb pH probes require periodic cleaning every 2 to 4 weeks to remove biofilm.
+Wi-Fi Coverage: The prototype uses 2.4 GHz Wi-Fi, meaning remote ponds without Wi-Fi require GSM modems.
+Single-Station Scope: Model 1 was calibrated specifically for the Bahadurabad transit station on the Jamuna River.
+6.2 Future Works
+LoRaWAN Long-Range Mesh: Use LoRaWAN transceivers to connect multiple ponds across a 10 km radius to a single gateway.
+On-Device TinyML Inference: Convert models with TinyML to run predictions directly on the ESP32 microcontroller.
+Solar Off-Grid Power: Add a 50W solar panel and 12V battery for 100% off-grid operation in rural areas.
+Appendix A: Circuit Schematic, Pin Mappings, and REST API Endpoints
+A.1 Complete Hardware Pinout Specifications
+Table A.1. Complete Hardware Pinout and Bus Interfacing Specifications
+ESP32 Pin
+Component Name
+Signal Category
+Operating Voltage
+Bus Protocol / Interface Circuit
+GPIO 34
+pH Sensor (pH-4502C)
+Analog Input
+0.0V -- 3.3V DC
+ADC1 Channel 6 (Wi-Fi safe, multi-sampled)
+GPIO 35
+TDS Sensor (Analog Out)
+Analog Input
+0.0V -- 2.3V DC
+ADC1 Channel 7 (Wi-Fi safe, multi-sampled)
+ADC pin [GPIO number to be confirmed]
+NTC Thermistor (Temperature)
+Analog Input
+3.3V DC
+Voltage divider with 4.7 kΩ pull-down resistor
+GPIO 5
+Ultrasonic Trig Pin
+Digital Output
+3.3V / 5.0V TTL
+10 μs trigger pulse output
+GPIO 18
+Ultrasonic Echo Pin
+Digital Input
+3.3V Logic Level
+Pulse-width return via 1kΩ/2kΩ voltage divider
+GPIO 19
+Relay 1 (Drain Pump)
+Digital Output
+5.0V Opto-isolated
+Active-LOW optocoupler trigger driver
+GPIO 21
+Relay 2 (Refill Pump)
+Digital Output
+5.0V Opto-isolated
+Active-LOW optocoupler trigger driver
+GPIO 23
+Servo Motor (Feeder)
+PWM Output
+5.0V DC (External)
+50 Hz hardware PWM (1.0 ms -- 2.0 ms duty cycle)
+3.3V
+pH Sensor (pH-4502C) & TDS Sensor Supply
+Sensor Power Rail
+3.3V DC
+Used instead of the standard 5V to protect the ESP32 ADC pins
+VIN / 5V
+LM2596 Output Rail
+Regulated Power
+5.0V DC (±2%)
+Filtered with 470 μF + 0.1 μF capacitors
+GND
+Common Ground
+Ground Rail
+0.0V Reference
+Common ground plane for MCU, sensors, and power
+A.2 AquaShield REST API Endpoints Specification
+Live sensor telemetry, historical records, pump command states, and calibration values are exchanged through the Firebase Realtime Database; the REST endpoints below are served by the Python FastAPI machine learning backend.
+Table A.2. AquaShield REST API Endpoints Specification (Python FastAPI ML Backend)
+HTTP Method
+API Route Endpoint
+Payload / Parameters
+Description & Response Output
+GET
+/api/ml/forecast/flood
+horizon=3
+Returns predicted Bahadurabad river water level and alert tier
+GET
+/api/ml/forecast/tds
+device_id
+Returns predicted +60m TDS value with SHAP feature rankings
+GET
+/api/ml/anomaly/status
+device_id
+Returns current Isolation Forest score and multivariate flag
+References
+[1] Department of Fisheries (DoF), 'Yearbook of Fisheries Statistics of Bangladesh 2022-23,' Ministry of Fisheries and Livestock, Dhaka, 2023.
+[2] Food and Agriculture Organization (FAO), 'The State of World Fisheries and Aquaculture 2024,' FAO, Rome, Italy, 2024.
+[3] Flood Forecasting and Warning Centre (FFWC), 'Annual Flood Report 2020,' BWDB, Dhaka, Bangladesh, 2021.
+[4] M. M. Rahman, M. A. Hossain, and S. Islam, 'Impact of climate change and extreme monsoon flooding on inland aquaculture in northern Bangladesh,' Journal of Water and Climate Change, vol. 12, no. 4, pp. 1420--1435, 2021.
+[5] C. E. Boyd, Water Quality: An Introduction, 3rd ed., Cham, Switzerland: Springer Nature, 2020.
+[6] J. E. Colt, Dissolved Gas Concentration in Water, 2nd ed., London: Academic Press, 2012.
+[7] P. Saha, D. Biswas, and A. K. Das, 'IoT-based automated water quality monitoring and alert system for fish farming,' in Proc. IEEE ICSCEE, Shah Alam, Malaysia, 2018, pp. 1--6.
+[8] K. R. Raju, G. H. Kumar, and M. V. Reddy, 'Automated water quality monitoring and control system for aquaculture using Raspberry Pi,' IEEE IoT Journal, vol. 7, no. 9, pp. 8412--8421, 2020.
+[9] M. R. Hasan, M. S. Alam, and T. Sultana, 'Design and deployment of a low-cost IoT telemetry node for rural fish ponds in Bangladesh,' in Proc. IEEE ICEEICT, Dhaka, 2021, pp. 215--220.
+[10] M. N. Islam, S. K. Roy, and R. Ahmed, 'Predictive water aeration and quality management using ESP32 edge microcontroller,' IEEE Access, vol. 10, pp. 54312--54324, 2022.
+[11] X. Chen, Y. Zhang, and L. Wang, 'Industrial PLC-driven multi-parameter recirculating aquaculture control system with deep LSTM DO prediction,' Computers and Electronics in Agriculture, vol. 205, art. no. 107621, 2023.
+[12] S. Ahmed, F. Farzana, and K. M. Kabir, 'Automated fish feeding and pond level management system using IoT relays and ultrasonic sensing,' in Proc. IEEE CONECCT, Bangalore, 2024, pp. 1--6.
+[13] F. T. Liu, K. M. Ting, and Z.-H. Zhou, 'Isolation Forest,' in Proc. 8th IEEE ICDM, Pisa, Italy, 2008, pp. 413--422.
+[14] S. M. Lundberg and S.-I. Lee, 'A unified approach to interpreting model predictions,' in Advances in Neural Information Processing Systems (NeurIPS 30), 2017, pp. 4765--4774.
+[15] T. Chen and C. Guestrin, 'XGBoost: A scalable tree boosting system,' in Proc. 22nd ACM SIGKDD, 2016, pp. 785--794.
+[16] L. Breiman, 'Random Forests,' Machine Learning, vol. 45, no. 1, pp. 5--32, 2001.
+[17] A. E. Hoerl and R. W. Kennard, 'Ridge regression: Biased estimation for nonorthogonal problems,' Technometrics, vol. 12, no. 1, pp. 55--67, 1970.
+[18] R. Tibshirani, 'Regression shrinkage and selection via the Lasso,' Journal of the Royal Statistical Society: Series B, vol. 58, no. 1, pp. 267--288, 1996.
+[19] J. E. Nash and J. V. Sutcliffe, 'River flow forecasting through conceptual models part I,' Journal of Hydrology, vol. 10, no. 3, pp. 282--290, 1970.
+[20] H. Hersbach et al., 'The ERA5 global reanalysis,' Quarterly Journal of the Royal Meteorological Society, vol. 146, no. 730, pp. 1999--2049, 2020.
+[21] Bangladesh Water Development Board (BWDB), 'Hydrometric Data Portal: Daily Water Levels and Discharges (Station SW46.9L),' BWDB Hydrology Division, Dhaka, 2024.
+[22] Espressif Systems, 'ESP32 Series Datasheet: 2.4 GHz Wi-Fi and Bluetooth Combo Chip,' Espressif Systems, Shanghai, China, 2023.
+[23] F. Pedregosa et al., 'Scikit-learn: Machine learning in Python,' Journal of Machine Learning Research, vol. 12, pp. 2825--2830, 2011.
+[24] Board of Accreditation for Engineering and Technical Education (BAETE), 'Manual for Accrediting Undergraduate Engineering Programmes,' IEB, Dhaka, Ver. 2.1, 2023.
+[25] University of Information Technology and Sciences (UITS), 'Capstone Project and Thesis Guidelines: Department of Computer Science and Engineering,' UITS Academic Council, Dhaka, Bangladesh, 2026.
+Plagiarism Report
+[Official Institutional Plagiarism Verification Report to be inserted here]
+In accordance with Department of Computer Science and Engineering capstone guidelines, the final project book must include the official similarity report from the university-designated plagiarism checking software (Turnitin / iThenticate). Upon completion of the final fee defense and review board revisions, the verified digital originality certificate will be attached to this designated section prior to final hardcover binding.
+Supervisor: Sultana Rokeya Naher, Associate Professor

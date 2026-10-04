@@ -57,3 +57,7 @@ node_modules/
 # of this repo already provides the same portability the folder was built
 # for; regenerate it locally any time (or just re-copy) if you want it again.
 AquaGuard_Portable_Package/
+
+# Ignore legacy archive with large data files
+_legacy/
+

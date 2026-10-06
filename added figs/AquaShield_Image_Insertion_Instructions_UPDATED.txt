@@ -1,0 +1,402 @@
+AquaShield Image Insertion Instructions — UPDATED
+=========================================================
+
+IMPORTANT
+---------
+The image numbering follows the Claude diagram set:
+
+    .1 = REPORT VERSION
+    .2 = PPT SLIDE VERSION
+
+The number before .1/.2 identifies the DIAGRAM, not the report chapter.
+
+Therefore:
+    1.1 = Diagram 1 Report
+    1.2 = Diagram 1 PPT
+    2.1 = Diagram 2 Report
+    2.2 = Diagram 2 PPT
+    3.1 = Diagram 3 Report
+    3.2 = Diagram 3 PPT
+    5.1 = Diagram 5 Report
+    5.2 = Diagram 5 PPT
+
+There is currently NO Diagram 4 image in the supplied filename list.
+Diagram 4 is the Dashboard Information Architecture diagram and still needs
+to be generated/added if required.
+
+=========================================================
+1. RENAME THE FILES
+=========================================================
+
+REPORT VERSIONS
+---------------
+
+1.1.png
+    -> Figure_D1_Report.png
+
+2.1.r-2026-10-06-072004.png
+    -> Figure_D2_Report.png
+
+3.1.r-2026-10-06-072122.png
+    -> Figure_D3_Report.png
+
+5.1.R-2026-10-06-071544.png
+    -> Figure_D5_Report.png
+
+
+PPT VERSIONS
+------------
+
+1.2.png
+    -> Figure_D1_PPT.png
+
+2.2.p-2026-10-06-072031.png
+    -> Figure_D2_PPT.png
+
+3.2.p-2026-10-06-072148.png
+    -> Figure_D3_PPT.png
+
+5.2.p-2026-10-06-071613.png
+    -> Figure_D5_PPT.png
+
+
+NOTE:
+The D1/D2/D3/D5 naming is intentional. These are diagram IDs and should
+not be confused with the report's Figure 1.1, 2.1, 3.1, etc.
+
+=========================================================
+2. WHAT EACH IMAGE IS
+=========================================================
+
+DIAGRAM 1
+---------
+Report: 1.1
+PPT:    1.2
+
+Title:
+Edge Node Finite State Machine (Local Automation)
+
+Purpose:
+Shows the ESP32 local control logic and the Offline Edge Fail-Safe behavior.
+
+Key project facts represented:
+- Water Level >= 85 cm -> Drain Pump
+- Water Level <= 40 cm -> Refill Pump
+- TDS >= 600 ppm -> Water Exchange
+- Abnormal pH -> local alert
+- Feeder Servo -> scheduled feeding state
+- Local Control Loop - No Internet Required
+
+REPORT PLACEMENT:
+Chapter 4, Section 4.3 (ESP32 Firmware Development & Local Sensing Pipeline)
+or the specific Hardware/Control subsection where the local FSM is explained.
+
+If the report has a dedicated discussion of the FSM/local control logic,
+place the figure immediately after that explanation.
+
+Suggested caption:
+"Figure X.X: ESP32 local finite-state-machine control logic for
+offline edge automation and fail-safe actuator operation."
+
+Important:
+Do NOT label this as Figure 1.1 simply because the source image is named
+1.1. The final figure number must follow the report's existing figure
+numbering sequence.
+
+PPT:
+Use the corresponding 1.2 image on the slide explaining local edge
+automation / FSM control.
+
+
+=========================================================
+DIAGRAM 2
+---------
+
+Report: 2.1.r...
+PPT:    2.2.p...
+
+Title:
+Edge Node Hardware Wiring and Power Distribution
+
+Purpose:
+Shows physical sensor/actuator connections, GPIO mappings, and the
+3.3V/5V power separation.
+
+REPORT PLACEMENT:
+Chapter 3, Section 3.3 (Hardware Design and Edge Sensing Layer)
+
+Place it after the hardware architecture/wiring explanation and before
+or alongside the detailed sensor/actuator descriptions.
+
+The Report version should show the exact GPIO mapping.
+
+Relevant mappings from the diagram specification:
+- pH -> GPIO34 (ADC1)
+- TDS -> GPIO35 (ADC1)
+- Temperature -> GPIO32
+- HC-SR04 Trig -> GPIO5
+- HC-SR04 Echo -> GPIO18
+- Drain Pump Relay -> GPIO25
+- Refill Pump Relay -> GPIO26
+- Feeder Servo -> GPIO13
+- 5V Rail
+- 3.3V Rail
+
+Suggested caption:
+"Figure X.X: Edge-node hardware wiring, GPIO assignments, and
+3.3V/5V power distribution of the AquaShield prototype."
+
+Important:
+Use the exact figure number available in the current Chapter 3 sequence.
+Do not automatically call this Figure 2.1.
+
+PPT:
+Use the corresponding 2.2 image on the hardware/system architecture slide.
+The PPT version intentionally simplifies the GPIO-level detail.
+
+
+=========================================================
+DIAGRAM 3
+---------
+
+Report: 3.1.r...
+PPT:    3.2.p...
+
+Title:
+Software Pipeline and Machine Learning Telemetry Flow
+
+Purpose:
+Shows how data moves from the ESP32 through Firebase/FastAPI and into
+the ML services and web dashboard.
+
+REPORT PLACEMENT:
+Chapter 3, Section 3.5 (Cloud Telemetry, REST API, and Database Schema)
+and/or Section 3.6 (ML Subsystem Methodology).
+
+Preferred placement:
+Put the figure in Section 3.5 immediately after the explanation of the
+overall telemetry/data pipeline, before the detailed ML methodology.
+
+The diagram should represent:
+ESP32
+  -> Firebase Realtime Database / FastAPI
+  -> ML services
+  -> Web Dashboard
+
+Models:
+- Model 1: River Forecast (Linear Regression), Bahadurabad SW46.9L
+- Model 2: TDS Forecast (+60 min / +1 h)
+- Model 3: Water-Quality Anomaly Detection (Isolation Forest, unsupervised)
+
+Important distinction:
+Model 1 is a regional pilot at Bahadurabad Transit station (SW46.9L),
+not a nationwide deployment.
+
+Suggested caption:
+"Figure X.X: AquaShield software telemetry and machine-learning data
+pipeline from the ESP32 edge node to cloud services, predictive models,
+and the web dashboard."
+
+Important:
+Do NOT automatically call this Figure 3.1. The current report already
+contains figures in Chapter 3, so use the next available figure number
+or replace an existing figure only if the project team explicitly decides
+to do so.
+
+PPT:
+Use the corresponding 3.2 image on the software/ML architecture slide.
+
+
+
+=========================================================
+DIAGRAM 5
+---------
+
+Report: 5.1.R...
+PPT:    5.2.p...
+
+Title:
+5-Tier Cyber-Physical System Architecture
+
+Purpose:
+Provides the high-level 10,000-foot view of the entire AquaShield system.
+
+REPORT PLACEMENT:
+Chapter 1, Section 1.1 (Introduction) or Section 1.3 (Motivation),
+depending on where the high-level system overview is discussed.
+
+Preferred placement:
+Put it early in Chapter 1, after the introductory explanation of
+AquaShield, so the reader sees the complete system before entering the
+detailed chapters.
+
+The five tiers are:
+1. Tier 1: Physical
+2. Tier 2: Edge (ESP32)
+3. Tier 3: Cloud Telemetry (Firebase)
+4. Tier 4: ML Analytics (FastAPI)
+5. Tier 5: User Interface
+
+Important scope distinction:
+Within the ML Analytics tier, Bahadurabad Transit (SW46.9L) must be
+identified as the REGIONAL PILOT for Model 1.
+
+Do NOT describe Bahadurabad/SW46.9L as a nationwide deployment.
+
+Suggested caption:
+"Figure X.X: High-level five-tier cyber-physical architecture of
+AquaShield, spanning physical sensing, edge computing, cloud telemetry,
+machine-learning analytics, and the user interface."
+
+PPT:
+Use the corresponding 5.2 image on the overall AquaShield architecture/
+system overview slide.
+
+
+=========================================================
+3. REPORT FIGURE NUMBERING — VERY IMPORTANT
+=========================================================
+
+The filenames 1.1, 2.1, 3.1, and 5.1 are DIAGRAM IDs from the Claude
+generation instructions.
+
+They are NOT automatically the final report figure numbers.
+
+Before inserting each report image:
+
+1. Open the current List of Figures.
+2. Check the figures already present in that chapter.
+3. Decide whether the new diagram replaces an existing figure or is an
+   additional figure.
+4. Assign the next correct sequential figure number.
+5. Update every in-text reference to that figure.
+6. Update the List of Figures.
+7. Update the Table of Contents/page numbers if required.
+
+DO NOT create duplicate Figure 3.1, Figure 3.2, Figure 5.1, etc.
+
+=========================================================
+4. IMAGE INSERTION FORMAT
+=========================================================
+
+For each REPORT diagram:
+
+A. Add a short explanatory paragraph before the figure.
+B. Insert the image.
+C. Put the figure caption directly below it.
+D. Refer to the figure in the surrounding text.
+E. Make sure the figure is readable at normal page zoom.
+F. Keep the image centered and consistently sized.
+G. Update the List of Figures.
+
+Example:
+
+"The overall AquaShield architecture integrates the physical sensing
+layer, local edge control, cloud telemetry, machine-learning services,
+and the user interface. The resulting five-tier structure is shown in
+Figure X.X."
+
+[INSERT IMAGE]
+
+"Figure X.X: High-level five-tier cyber-physical architecture of
+AquaShield, spanning physical sensing, edge computing, cloud telemetry,
+machine-learning analytics, and the user interface."
+
+
+=========================================================
+5. PPT INSERTION RULES
+=========================================================
+
+The PPT versions are NOT additional report figures.
+
+They are simplified presentation versions of the same five diagrams.
+
+Use:
+- D1 PPT -> Local FSM / Edge Automation slide
+- D2 PPT -> Hardware / Wiring slide
+- D3 PPT -> Software / Telemetry / ML slide
+- D4 PPT -> Dashboard / UI / Alerts slide (currently missing)
+- D5 PPT -> High-Level AquaShield Architecture slide
+
+Do not use the PPT images as the primary report figures if the detailed
+Report versions are available.
+
+
+=========================================================
+6. FINAL PLACEMENT SUMMARY
+=========================================================
+
+D1 Report:
+    1.1.png
+    -> Chapter 4, local FSM / edge control
+    -> Figure number assigned according to Chapter 4 sequence
+
+D1 PPT:
+    1.2.png
+    -> Presentation slide: Local FSM / Edge Automation
+
+D2 Report:
+    2.1.r...
+    -> Chapter 3, Section 3.3 Hardware Design
+    -> Figure number assigned according to Chapter 3 sequence
+
+D2 PPT:
+    2.2.p...
+    -> Presentation slide: Hardware Architecture
+
+D3 Report:
+    3.1.r...
+    -> Chapter 3, Section 3.5/3.6 Software + ML Data Pipeline
+    -> Figure number assigned according to Chapter 3 sequence
+
+D3 PPT:
+    3.2.p...
+    -> Presentation slide: Software / Telemetry / ML Pipeline
+
+D4 Report:
+    MISSING
+    -> Chapter 5, Dashboard / UI / Alerts
+
+D4 PPT:
+    MISSING
+    -> Presentation slide: Dashboard / UI / Alerts
+
+D5 Report:
+    5.1.R...
+    -> Chapter 1, Introduction / High-Level Architecture
+    -> Figure number assigned according to Chapter 1 sequence
+
+D5 PPT:
+    5.2.p...
+    -> Presentation slide: High-Level AquaShield Architecture
+
+
+=========================================================
+7. FINAL CHECKLIST FOR THE PERSON EDITING THE REPORT
+=========================================================
+
+[ ] Rename all supplied files according to the naming scheme above.
+[ ] Keep Report and PPT versions in separate folders if possible.
+[ ] Remember: .1 = Report, .2 = PPT.
+[ ] Remember: the leading number identifies the diagram, NOT the chapter.
+[ ] Insert D1 in Chapter 4.
+[ ] Insert D2 in Chapter 3.
+[ ] Insert D3 in Chapter 3.
+[ ] Generate/find D4 before claiming the complete five-diagram set is done.
+[ ] Insert D5 in Chapter 1.
+[ ] Do not put D5 in Chapter 5 just because the filename begins with 5.
+[ ] Do not create duplicate report figure numbers.
+[ ] Use the detailed Report versions in the report.
+[ ] Use the simplified PPT versions in the presentation.
+[ ] Add an explanatory sentence before each report figure.
+[ ] Add a proper caption below each report figure.
+[ ] Add an in-text cross-reference to each figure.
+[ ] Update the List of Figures.
+[ ] Update page numbers after final layout.
+[ ] Keep the project name consistently as AquaShield.
+[ ] Keep Model 1 clearly identified as the Bahadurabad SW46.9L regional
+    pilot, not a nationwide validation/deployment.
+[ ] Do not invent technical details that are not supported by the project
+    report or diagram specification.
+
+END OF INSTRUCTIONS

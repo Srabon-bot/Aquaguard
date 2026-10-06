@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaGuard — Analytics</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .period-tabs { display: flex; gap: 10px; margin-bottom: 18px; }
+  .chart-panel { margin-bottom: 22px; }
+  .chart-panel:last-child { margin-bottom: 0; }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .chart-head h3 { margin: 0; }
+  .chart-stats { font-size: 0.85rem; color: var(--text-secondary); }
+  .analytics-chart { width: 100%; height: auto; display: block; }
+  .chart-avg-line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+  .chart-min-line, .chart-max-line { fill: none; stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+  .chart-axis-text { fill: var(--text-muted); font-size: 9px; }
+  .chart-empty-text { fill: var(--text-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">📊</span>
+    <div>
+      <h1>Analytics</h1>
+      <p class="tagline">Historical sensor trends — day, week, or month</p>
+    </div>
+  </div>
+  <a href="index.html" class="neu-btn">← Back to dashboard</a>
+</header>
+
+<main>
+
+  <section class="panel neu-flat" aria-label="About this page">
+    <p class="model-desc">
+      Reads from Firebase's <code>/history</code> path — a snapshot pushed every 5 minutes by
+      <code>hardware/AquaGuard_v2/AquaGuard_v2.ino</code>. Each period below re-buckets that history
+      into hourly (Day), daily (Week), or daily (Month) averages, with the min/max range shown as
+      dashed lines around the solid average line.
+    </p>
+  </section>
+
+  <section class="panel" aria-label="Period selector">
+    <div class="period-tabs">
+      <button id="periodDay" class="neu-btn primary" data-period="day">Day</button>
+      <button id="periodWeek" class="neu-btn" data-period="week">Week</button>
+      <button id="periodMonth" class="neu-btn" data-period="month">Month</button>
+    </div>
+    <div id="analyticsStatus" class="location-status"></div>
+  </section>
+
+  <section class="panel neu-raised chart-panel" aria-label="pH history">
+    <div class="chart-head">
+      <h3>pH</h3>
+      <span id="stats-ph" class="chart-stats"></span>
+    </div>
+    <svg id="chart-ph" class="analytics-chart" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+  </section>
+
+  <section class="panel neu-raised chart-panel" aria-label="TDS history">
+    <div class="chart-head">
+      <h3>Water quality (TDS)</h3>
+      <span id="stats-tds" class="chart-stats"></span>
+    </div>
+    <svg id="chart-tds" class="analytics-chart" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+  </section>
+
+  <section class="panel neu-raised chart-panel" aria-label="Temperature history">
+    <div class="chart-head">
+      <h3>Temperature</h3>
+      <span id="stats-temp" class="chart-stats"></span>
+    </div>
+    <svg id="chart-temp" class="analytics-chart" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+  </section>
+
+  <section class="panel neu-raised chart-panel" aria-label="Water level history">
+    <div class="chart-head">
+      <h3>Water level</h3>
+      <span id="stats-level" class="chart-stats"></span>
+    </div>
+    <svg id="chart-level" class="analytics-chart" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+    <p class="honesty-note">
+      Raw sensor-to-water-surface distance (smaller = more water), not yet converted to a calibrated
+      fill depth — see the dashboard's Tank state panel note.
+    </p>
+  </section>
+
+</main>
+
+<footer class="page-footer">
+  <p>AquaGuard — analytics page. Data source: Firebase <code>/history</code>.</p>
+</footer>
+
+<script src="analytics.js"></script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaGuard — Pond Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">🌊</span>
+    <div>
+      <h1>AquaGuard</h1>
+      <p class="tagline">IoT pond management + regional flood early-warning</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="analytics.html" class="neu-btn" title="Historical sensor trends">📊 Analytics</a>
+    <a href="ph-calibration.html" class="neu-btn" title="Calibrate the pH sensor">🧪 pH calibration</a>
+    <button id="themeToggle" class="neu-btn icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <span id="themeIcon">🌙</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== Location bar ===================== -->
+  <section class="panel location-bar" aria-label="Location">
+    <div class="neu-flat location-row">
+      <label for="stationSelect" class="field-label">Station / district</label>
+      <select id="stationSelect" class="neu-input">
+        <option value="">Loading stations…</option>
+      </select>
+      <button id="geoBtn" class="neu-btn">📍 Use my location</button>
+      <span id="locationStatus" class="location-status">Choose a station or use your location to begin.</span>
+    </div>
+  </section>
+
+  <div class="grid-2">
+
+    <!-- ===================== Weather ===================== -->
+    <section class="panel neu-raised" aria-label="Current weather">
+      <h2>Current weather</h2>
+      <div id="weatherBody" class="empty-state">
+        Select a location above to load current weather.
+      </div>
+    </section>
+
+    <!-- ===================== Tank state ===================== -->
+    <section class="panel neu-raised" aria-label="Tank state">
+      <div class="panel-header-row">
+        <h2>Tank state</h2>
+        <span class="demo-badge" title="Computed from the real water-level sensor, but the fill % assumes a placeholder tank depth (60cm) until the sensor's real mount height is measured and calibrated — see app.js's TANK_HEIGHT_CM comment.">APPROXIMATE FILL %</span>
+      </div>
+      <div class="tank-visual-wrap">
+        <svg id="tankSvg" viewBox="0 0 120 160" class="tank-svg" aria-hidden="true">
+          <rect x="4" y="4" width="112" height="152" rx="10" class="tank-outline"/>
+          <clipPath id="tankClip">
+            <rect x="8" y="8" width="104" height="144" rx="7"/>
+          </clipPath>
+          <rect id="tankWater" x="8" y="80" width="104" height="72" clip-path="url(#tankClip)" class="tank-water"/>
+        </svg>
+        <div class="tank-readout">
+          <span id="tankLevelPct" class="tank-level-value">—%</span>
+          <span class="tank-level-caption">estimated fill</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== Sensor tiles ===================== -->
+  <section class="panel" aria-label="Live sensor readings">
+    <div class="panel-header-row">
+      <h2>Sensor readings</h2>
+    </div>
+    <div id="sensorAlertBanner" class="alert-banner" aria-live="polite" style="display:none"></div>
+
+    <div class="tile-grid">
+      <div class="stat-tile neu-raised" data-sensor="ph">
+        <div class="stat-tile-top">
+          <span class="stat-label">pH</span>
+          <span id="chip-ph" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-ph">
+            <span id="tile-ph" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">safe range 6.5 – 8.5</span>
+            <svg id="spark-ph" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stat-tile neu-raised" data-sensor="tds">
+        <div class="stat-tile-top">
+          <span class="stat-label">Water quality (TDS)</span>
+          <span id="chip-tds" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-tds">
+            <span id="tile-tds" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">ppm · safe under 500</span>
+            <svg id="spark-tds" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stat-tile neu-raised" data-sensor="temp">
+        <div class="stat-tile-top">
+          <span class="stat-label">Temperature</span>
+          <span id="chip-temp" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-temp">
+            <span id="tile-temp" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">°C · comfortable 20 – 30</span>
+            <svg id="spark-temp" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stat-tile neu-raised" data-sensor="level">
+        <div class="stat-tile-top">
+          <span class="stat-label">Water level</span>
+          <span id="chip-level" class="status-chip good tile-chip"><span class="status-dot"></span>OK</span>
+        </div>
+        <div class="stat-tile-mid">
+          <div class="gauge-ring" id="gauge-level">
+            <span id="tile-level" class="stat-value">—</span>
+          </div>
+          <div class="stat-tile-info">
+            <span class="stat-sub">cm from sensor · fill depth</span>
+            <svg id="spark-level" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="footnote">
+      The ring around each value shows where the reading sits in its full sensor range, colored on
+      the same good / warning / critical scale as the flood-risk badges below; the line traces the
+      last ~30 readings. Live from Firebase (<code>/sensor/*</code>), polled every few seconds — see
+      <code>hardware/AquaGuard_v2/</code> for the firmware that publishes it. pH shows
+      "NOT CALIBRATED" until the probe has been calibrated at least once — see the
+      <a href="ph-calibration.html">pH calibration page</a>.
+    </p>
+  </section>
+
+  <!-- ===================== Pump control ===================== -->
+  <section class="panel" aria-label="Pump control">
+    <div class="panel-header-row">
+      <h2>Pump control</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="pump-card neu-raised">
+        <div class="pump-card-head">
+          <h3>Pump 1 — drain</h3>
+          <span id="pump1Status" class="status-chip muted"><span class="status-dot"></span>OFF</span>
+        </div>
+        <button id="pump1Toggle" class="neu-btn" data-pump="1">Turn ON</button>
+      </div>
+
+      <div class="pump-card neu-raised">
+        <div class="pump-card-head">
+          <h3>Pump 2 — refill</h3>
+          <span id="pump2Status" class="status-chip muted"><span class="status-dot"></span>OFF</span>
+        </div>
+        <button id="pump2Toggle" class="neu-btn" data-pump="2">Turn ON</button>
+      </div>
+    </div>
+
+    <div class="neu-flat water-cycle">
+      <h3>Water cycle</h3>
+      <p class="model-desc">Drain, then refill, automatically — for the exact timings you'd normally do by hand.</p>
+
+      <div class="cycle-inputs">
+        <label class="field-label" for="drainSeconds">Drain duration (sec)
+          <input id="drainSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="30">
+        </label>
+        <label class="field-label" for="refillSeconds">Refill duration (sec)
+          <input id="refillSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="30">
+        </label>
+      </div>
+
+      <div class="cycle-controls">
+        <button id="startCycle" class="neu-btn primary">▶ Start water cycle</button>
+        <button id="cancelCycle" class="neu-btn" style="display:none">■ Cancel</button>
+      </div>
+
+      <div class="cycle-progress-wrap" style="display:none" id="cycleProgressWrap">
+        <div class="cycle-progress-track"><div id="cycleProgressBar" class="cycle-progress-bar"></div></div>
+      </div>
+      <p id="cycleStatus" class="cycle-status">Idle.</p>
+    </div>
+
+    <p class="footnote">
+      Writes to <code>/pumps/pump1</code> / <code>/pumps/pump2</code> in Firebase — the same paths
+      <code>hardware/AquaGuard_v2/AquaGuard_v2.ino</code>'s <code>controlPumps()</code> reads and
+      drives the relay from. Chips reflect the real state reported back by Firebase, not just what
+      was last clicked here.
+    </p>
+  </section>
+
+  <!-- ===================== Bahadurabad Water-Level Forecast ===================== -->
+  <section class="panel" aria-label="Bahadurabad flood forecast" id="bahadurabad-section">
+    <div class="panel-header-row">
+      <div>
+        <h2>🌊 Bahadurabad River Forecast <span class="station-badge">SW46.9L · Jamuna</span></h2>
+        <p class="section-intro">
+          AI-powered water-level forecast for Bahadurabad gauge station (2008–2022 trained,
+          LOYO cross-validated). Predictions at +1, +3, +7 and +14 days using Linear Regression
+          on lag features, rate-of-change and catchment ERA5 rainfall.
+        </p>
+      </div>
+      <button id="refreshForecast" class="neu-btn primary" title="Refresh forecast">
+        🔄 Refresh
+      </button>
+    </div>
+
+    <!-- Alert banner -->
+    <div id="bhdAlertBanner" class="alert-banner" aria-live="polite" style="display:none"></div>
+
+    <!-- Current observation row -->
+    <div id="bhdObsRow" class="bhd-obs-row neu-flat" style="display:none">
+      <div class="bhd-obs-item">
+        <span class="bhd-obs-label">Current Level</span>
+        <span class="bhd-obs-value" id="bhdCurrLevel">—</span>
+        <span class="bhd-obs-unit">m PWD</span>
+      </div>
+      <div class="bhd-obs-item">
+        <span class="bhd-obs-label">24h Change</span>
+        <span class="bhd-obs-value" id="bhdDailyChange">—</span>
+        <span class="bhd-obs-unit">cm</span>
+      </div>
+      <div class="bhd-obs-item">
+        <span class="bhd-obs-label">Catchment Rain</span>
+        <span class="bhd-obs-value" id="bhdRain">—</span>
+        <span class="bhd-obs-unit">mm/day</span>
+      </div>
+      <div class="bhd-obs-item">
+        <span class="bhd-obs-label">Danger Level</span>
+        <span class="bhd-obs-value" style="color:var(--status-critical)">19.05</span>
+        <span class="bhd-obs-unit">m PWD</span>
+      </div>
+      <div class="bhd-obs-item">
+        <span class="bhd-obs-label">As of</span>
+        <span class="bhd-obs-value" id="bhdAsOf" style="font-size:0.95rem">—</span>
+        <span class="bhd-obs-unit"></span>
+      </div>
+    </div>
+
+    <!-- Forecast horizon cards -->
+    <div id="bhdForecastCards" class="grid-4 bhd-forecast-grid" style="display:none"></div>
+
+    <!-- Hydrograph chart -->
+    <div id="bhdChartWrap" class="neu-flat bhd-chart-wrap" style="display:none">
+      <h3>Water Level Hydrograph — Past 7 Days + AI Forecast</h3>
+      <div class="bhd-chart-legend">
+        <span class="legend-item"><span class="legend-line observed"></span> Observed</span>
+        <span class="legend-item"><span class="legend-line forecast"></span> AI Forecast</span>
+        <span class="legend-item"><span class="legend-line danger"></span> Danger Level (19.05 m)</span>
+      </div>
+      <div class="bhd-chart-container">
+        <svg id="bhdChart" class="bhd-svg" viewBox="0 0 800 220" preserveAspectRatio="xMidYMid meet"
+             role="img" aria-label="Bahadurabad water level hydrograph">
+          <!-- grid lines drawn by JS -->
+        </svg>
+      </div>
+    </div>
+
+    <!-- Bilingual advice cards -->
+    <div id="bhdAdviceCards" class="bhd-advice-grid" style="display:none"></div>
+
+    <!-- Loading / error states -->
+    <div id="bhdLoading" class="empty-state">
+      <span class="spinner"></span> Loading Bahadurabad forecast…
+    </div>
+    <div id="bhdError" class="error-box" style="display:none"></div>
+  </section>
+
+  <!-- ===================== Pond Water Quality AI (Models 2 & 3) ===================== -->
+  <section class="panel neu-flat" aria-label="Pond Water Quality AI">
+    <h2>Pond Water Quality AI</h2>
+    <div class="grid-2">
+      
+      <!-- Model 2: TDS Forecast -->
+      <div class="stat-tile neu-raised" id="cardTDSForecast">
+        <div class="tile-icon">🔮</div>
+        <div class="tile-label">AI Water Quality Forecast (+60 min)</div>
+        <div class="tile-value" style="font-size: 1.8rem; margin-top: 10px;">
+          <span id="tdsPredValue">--</span><span class="unit"> ppm</span>
+        </div>
+        <div class="tile-meta" style="margin-top: 5px;">
+          Current: <strong id="tdsCurrValue">--</strong> ppm <br>
+          Trend: <strong id="tdsTrend" style="color: var(--accent);">--</strong>
+        </div>
+      </div>
+
+      <!-- Model 3: Anomaly Detection -->
+      <div class="stat-tile neu-raised" id="cardAnomaly">
+        <div class="tile-icon">🛡️</div>
+        <div class="tile-label">Pond Condition Anomaly Detection</div>
+        <div class="tile-value" style="font-size: 1.5rem; margin-top: 10px;" id="anomalyStatus">
+          --
+        </div>
+        <div class="tile-meta" style="margin-top: 5px;">
+          Anomaly Score: <strong id="anomalyScore">--</strong> <br>
+          <span id="anomalyMsg" style="opacity: 0.8;">--</span>
+        </div>
+        <button id="btnTestAnomaly" class="neu-btn" style="margin-top:10px; padding: 4px 10px; font-size: 0.75rem;">Simulate Sensor Spike</button>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="page-footer">
+  <p>AquaGuard — final-year IoT capstone. Flood model: <code>backend/</code> · Hardware: <code>hardware/</code>.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

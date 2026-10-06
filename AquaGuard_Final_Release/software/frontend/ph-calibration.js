@@ -1,10 +1,10 @@
 // ============================================================================
-// AquaGuard — pH calibration page.
+// AquaShield — pH calibration page.
 //
 // Talks directly to the Firebase Realtime Database over plain REST calls (no
 // SDK, no build step — same "no bundler" philosophy as app.js), reading and
 // writing the /phCalibration/* paths that
-// hardware/rebuild/07_full_reintegration/AquaGuard_v2.ino's handlePhCalibration()
+// hardware/rebuild/07_full_reintegration/AquaShield_v2.ino's handlePhCalibration()
 // polls and updates. See that sketch's header comment for the full protocol.
 //
 // FIREBASE_BASE_URL is NOT a secret (Firebase client config is meant to be
@@ -21,7 +21,7 @@ const POLL_INTERVAL_MS = 2000;
 // this page has no toggle of its own, just follows the saved preference).
 // ---------------------------------------------------------------------------
 (function initTheme() {
-  const saved = localStorage.getItem("aquaguard-theme");
+  const saved = localStorage.getItem("AquaShield-theme");
   if (saved) document.documentElement.setAttribute("data-theme", saved);
 })();
 

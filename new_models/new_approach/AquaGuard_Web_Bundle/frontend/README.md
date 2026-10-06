@@ -1,4 +1,4 @@
-# AquaGuard dashboard (frontend)
+# AquaShield dashboard (frontend)
 
 A single static page — no build step, no npm install. Plain HTML/CSS/JS.
 
@@ -57,7 +57,7 @@ exact command to start it, instead of a silent failure.
   automatically switches to pump 2 (refill) for another editable duration, with a live progress
   bar and a cancel button. Same reasoning as the sensor data: real control needs real Firebase
   writes to `/pumps/pump1` / `/pumps/pump2` (the same paths `controlPumps()` in
-  `hardware/original_reference/AquaGuard_full_original.ino` already reads), and that's held off
+  `hardware/original_reference/AquaShield_full_original.ino` already reads), and that's held off
   until hardware is actually reintegrated — see the wiring note below.
 
 ## Wiring up real sensor data later

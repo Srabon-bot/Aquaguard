@@ -1,8 +1,8 @@
 // ============================================================================
-// AquaGuard — analytics page.
+// AquaShield — analytics page.
 //
 // Reads Firebase's /history path (a snapshot pushed every ~5 minutes by
-// hardware/AquaGuard_v2/AquaGuard_v2.ino: temp, tds, ph, level, timestamp)
+// hardware/AquaShield_v2/AquaShield_v2.ino: temp, tds, ph, level, timestamp)
 // over plain REST, buckets it into Day/Week/Month views client-side, and
 // draws 4 simple hand-rolled SVG charts (avg line + min/max dashed band) --
 // no charting library, same "no build step" approach as the rest of this
@@ -15,7 +15,7 @@ const FIREBASE_BASE_URL = "https://aquasheild-2e2ca-default-rtdb.asia-southeast1
 // Theme (match whatever the user last picked on the main dashboard).
 // ---------------------------------------------------------------------------
 (function initTheme() {
-  const saved = localStorage.getItem("aquaguard-theme");
+  const saved = localStorage.getItem("AquaShield-theme");
   if (saved) document.documentElement.setAttribute("data-theme", saved);
 })();
 

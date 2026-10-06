@@ -34,6 +34,11 @@ CLAUDE PROMPT 1 — ESP32 LOCAL FSM
 ==================================================
 A. Diagram Title: Edge Node Finite State Machine (Local Automation)
 B. Recommended Location: Chapter 4 / Hardware & Control
+
+**CRITICAL CONFLICT NOTE:** 
+The Capstone Report describes the Local FSM (Offline Edge Fail-Safe) as an active feature. However, the actual firmware (hardware/AquaGuard_v2/AquaGuard_v2.ino) explicitly documents the local FSM safety auto-cycling as separate, not-yet-built future work. 
+**Authoritative Source for Diagram:** The Capstone Report is treated as authoritative for this diagram to reflect the planned/defended architecture, but note that this logic is not yet implemented in the physical hardware files.
+
 C. Purpose: To illustrate the local control logic of the ESP32 that runs independently of cloud connectivity (Offline Edge Fail-Safe).
 D. Exact Project Facts:
    - High Water Level (>= 85 cm) triggers the Drain Pump.
@@ -64,6 +69,9 @@ A. Diagram Title: Edge Node Hardware Wiring and Power Distribution
 B. Recommended Location: Chapter 3 / System Architecture
 C. Purpose: To show the physical connections, GPIO mappings, and dual power rails (5V and 3.3V) to protect the ESP32 ADC.
 D. Exact Project Facts:
+
+   - *Conflict Note:* The report lists Temp on GPIO32. However, the actual firmware uses a 10k NTC Thermistor with a 4.7k series resistor on GPIO32, not a digital sensor. The report appears authoritative for the pin mapping, but the firmware proves it is an analog thermistor layout.
+
    - pH: GPIO34 (ADC1), powered via 3.3V (safety).
    - TDS: GPIO35 (ADC1), powered via 3.3V.
    - Temp: GPIO32.

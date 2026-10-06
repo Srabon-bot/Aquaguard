@@ -1,11 +1,11 @@
 // ============================================================================
-// AquaGuard dashboard — no build step, plain fetch calls.
+// AquaShield dashboard — no build step, plain fetch calls.
 //
 // Talks to THREE things:
 //  1. Bahadurabad Forecast API (new_approach FastAPI) -> http://127.0.0.1:8000
 //  2. Open-Meteo's free current-weather API (no key needed, external)
 //  3. Firebase Realtime Database -> live sensor readings + pump control,
-//     the same /sensor/*, /pumps/* paths hardware/AquaGuard_v2/AquaGuard_v2.ino
+//     the same /sensor/*, /pumps/* paths hardware/AquaShield_v2/AquaShield_v2.ino
 //     reads/writes. Plain REST (fetch), no SDK -- see fbGet/fbPut below.
 // ============================================================================
 
@@ -35,7 +35,7 @@ let stationsCache = [];
 // Theme toggle
 // ---------------------------------------------------------------------------
 (function initTheme() {
-  const saved = localStorage.getItem("aquaguard-theme");
+  const saved = localStorage.getItem("AquaShield-theme");
   if (saved) document.documentElement.setAttribute("data-theme", saved);
   updateThemeIcon();
 })();
@@ -44,7 +44,7 @@ document.getElementById("themeToggle").addEventListener("click", () => {
   const current = document.documentElement.getAttribute("data-theme");
   const next = current === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("aquaguard-theme", next);
+  localStorage.setItem("AquaShield-theme", next);
   updateThemeIcon();
 });
 
@@ -364,7 +364,7 @@ function escapeHtml(str) {
 
 // ---------------------------------------------------------------------------
 // Pump control — REAL. Writes to /pumps/pump1 and /pumps/pump2, the same
-// paths hardware/AquaGuard_v2/AquaGuard_v2.ino's controlPumps() reads and
+// paths hardware/AquaShield_v2/AquaShield_v2.ino's controlPumps() reads and
 // drives the relay from.
 // ---------------------------------------------------------------------------
 const pumpState = { 1: false, 2: false };
@@ -459,12 +459,12 @@ document.getElementById("cancelCycle").addEventListener("click", () => {
 
 // ---------------------------------------------------------------------------
 // Live sensor data — polled from Firebase (/sensor/*), the same path
-// hardware/AquaGuard_v2/AquaGuard_v2.ino publishes to every ~1.5s.
+// hardware/AquaShield_v2/AquaShield_v2.ino publishes to every ~1.5s.
 // ---------------------------------------------------------------------------
 // TANK_HEIGHT_CM is still an ASSUMED placeholder, not a measured constant --
 // the firmware currently publishes /sensor/waterLevel as raw ultrasonic
 // distance (sensor-to-water-surface, smaller = more water), not yet
-// converted to "cm of water" (see AquaGuard_v2.ino's own header comment,
+// converted to "cm of water" (see AquaShield_v2.ino's own header comment,
 // "STILL NOT included"). The fill-percentage math below divides by this
 // constant as if waterLevel were already water depth, which is only
 // correct once that conversion is built and this constant is set to the
@@ -507,7 +507,7 @@ function renderSensorTile(key, value) {
   const cfg = SENSOR_CONFIG[key];
 
   // pH in particular is legitimately absent from Firebase until the probe
-  // has been calibrated at least once (AquaGuard_v2.ino only ever writes
+  // has been calibrated at least once (AquaShield_v2.ino only ever writes
   // /sensor/ph after a successful calibration) -- show that honestly
   // instead of a fabricated number or a silent gap.
   if (value == null || Number.isNaN(value)) {

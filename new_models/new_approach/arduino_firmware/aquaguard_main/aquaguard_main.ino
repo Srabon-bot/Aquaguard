@@ -18,7 +18,6 @@ const char* firebase_endpoint = "https://aquasheild-2e2ca-default-rtdb.asia-sout
 // Pin Definitions
 #define PH_PIN 34           // Analog pin for pH Sensor
 #define TDS_PIN 35          // Analog pin for TDS Sensor
-#define TURBIDITY_PIN 32    // Analog pin for Turbidity Sensor
 #define ONE_WIRE_BUS 4      // Digital pin for DS18B20 Temp Sensor
 #define TRIG_PIN 5          // Digital pin for Ultrasonic Trig
 #define ECHO_PIN 18         // Digital pin for Ultrasonic Echo
@@ -74,13 +73,6 @@ float read_tds(float temperature) {
   return (133.42 * pow(compVolt, 3) - 255.86 * pow(compVolt, 2) + 857.39 * compVolt) * tds_factor;
 }
 
-float read_turbidity() {
-  int sensorValue = analogRead(TURBIDITY_PIN);
-  float voltage = sensorValue * (3.3 / 4095.0);
-  float ntu = -1120.4 * square(voltage) + 5742.3 * voltage - 4352.9; 
-  return max(0.0f, ntu);
-}
-
 float read_temperature() {
   sensors.requestTemperatures(); 
   return sensors.getTempCByIndex(0);
@@ -113,7 +105,6 @@ void loop() {
   float tempC = read_temperature();
   float ph = read_ph();
   float tds = read_tds(tempC);
-  float turbidity = read_turbidity();
   float water_level = read_water_level();
   float distance_cm = total_tank_height_cm - water_level;
 
@@ -122,7 +113,6 @@ void loop() {
   fastApiPayload += "\"temperature\":" + String(tempC) + ",";
   fastApiPayload += "\"ph\":" + String(ph) + ",";
   fastApiPayload += "\"tds\":" + String(tds) + ",";
-  fastApiPayload += "\"turbidity\":" + String(turbidity) + ",";
   fastApiPayload += "\"water_distance_cm\":" + String(distance_cm);
   fastApiPayload += "}";
 

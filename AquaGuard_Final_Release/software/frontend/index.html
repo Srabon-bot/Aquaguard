@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AquaGuard — Pond Dashboard</title>
+<title>AquaShield — Pond Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="brand">
     <span class="brand-mark" aria-hidden="true">🌊</span>
     <div>
-      <h1>AquaGuard</h1>
+      <h1>AquaShield</h1>
       <p class="tagline">IoT pond management + regional flood early-warning</p>
     </div>
   </div>
@@ -144,7 +144,7 @@
       The ring around each value shows where the reading sits in its full sensor range, colored on
       the same good / warning / critical scale as the flood-risk badges below; the line traces the
       last ~30 readings. Live from Firebase (<code>/sensor/*</code>), polled every few seconds — see
-      <code>hardware/AquaGuard_v2/</code> for the firmware that publishes it. pH shows
+      <code>hardware/AquaShield_v2/</code> for the firmware that publishes it. pH shows
       "NOT CALIBRATED" until the probe has been calibrated at least once — see the
       <a href="ph-calibration.html">pH calibration page</a>.
     </p>
@@ -200,7 +200,7 @@
 
     <p class="footnote">
       Writes to <code>/pumps/pump1</code> / <code>/pumps/pump2</code> in Firebase — the same paths
-      <code>hardware/AquaGuard_v2/AquaGuard_v2.ino</code>'s <code>controlPumps()</code> reads and
+      <code>hardware/AquaShield_v2/AquaShield_v2.ino</code>'s <code>controlPumps()</code> reads and
       drives the relay from. Chips reflect the real state reported back by Firebase, not just what
       was last clicked here.
     </p>
@@ -321,7 +321,7 @@
 </main>
 
 <footer class="page-footer">
-  <p>AquaGuard — final-year IoT capstone. Flood model: <code>backend/</code> · Hardware: <code>hardware/</code>.</p>
+  <p>AquaShield — final-year IoT capstone. Flood model: <code>backend/</code> · Hardware: <code>hardware/</code>.</p>
 </footer>
 
 <script src="app.js"></script>

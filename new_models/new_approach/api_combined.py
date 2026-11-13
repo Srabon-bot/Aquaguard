@@ -174,7 +174,7 @@ def predict_tds():
     df_feat.dropna(inplace=True)
 
     last_row = df_feat.iloc[-1:]
-    features = [c for c in df_feat.columns if c not in ["TDS", "pH", "temperature"]]
+    features = list(tds_model.feature_names_in_) if hasattr(tds_model, "feature_names_in_") else [c for c in df_feat.columns if c not in ["TDS", "pH", "temperature"]]
     pred_tds = float(tds_model.predict(last_row[features])[0])
     curr_tds = float(last_row["TDS"].values[0])
 

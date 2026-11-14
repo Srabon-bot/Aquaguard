@@ -461,17 +461,28 @@ document.getElementById("cancelCycle").addEventListener("click", () => {
 // Live sensor data — polled from Firebase (/sensor/*), the same path
 // hardware/AquaShield_v2/AquaShield_v2.ino publishes to every ~1.5s.
 // ---------------------------------------------------------------------------
-// TANK_HEIGHT_CM is still an ASSUMED placeholder, not a measured constant --
-// the firmware currently publishes /sensor/waterLevel as raw ultrasonic
-// distance (sensor-to-water-surface, smaller = more water), not yet
-// converted to "cm of water" (see AquaShield_v2.ino's own header comment,
-// "STILL NOT included"). The fill-percentage math below divides by this
-// constant as if waterLevel were already water depth, which is only
-// correct once that conversion is built and this constant is set to the
-// real measured sensor-mount height. Until then, treat the tank fill
-// percentage/visual as approximate, not calibrated -- the 4 sensor tiles
-// above it (pH/TDS/temp/level) are real regardless.
-const TANK_HEIGHT_CM = 60;
+// TANK CALIBRATION — measured on the real tank, 2026-11-14.
+//
+// The firmware publishes /sensor/waterLevel as the RAW ultrasonic distance
+// from the sensor down to the water surface, in cm. Smaller distance means
+// MORE water. It is not water depth, so it has to be converted before it is
+// shown anywhere:
+//
+//   SENSOR_EMPTY_DIST_CM = 32.9 cm -> tank empty, sensor looks at the bottom
+//   SENSOR_FULL_DIST_CM  = 18.0 cm -> tank filled to its max mark
+//   TANK_DEPTH_CM        = 14.9 cm -> usable water depth (empty - full)
+//
+// levelDepthCm() maps raw distance -> cm of water and clamps to the tank's
+// real depth, so sensor noise below the bottom or above the max mark can
+// never produce a negative reading or more than 100%. Everything downstream
+// (tile, gauge ring, tank graphic) works in water depth, not raw distance.
+const SENSOR_EMPTY_DIST_CM = 32.9;
+const SENSOR_FULL_DIST_CM  = 18.0;
+const TANK_DEPTH_CM = SENSOR_EMPTY_DIST_CM - SENSOR_FULL_DIST_CM; // 14.9
+
+function levelDepthCm(rawDistCm) {
+  return Math.max(0, Math.min(TANK_DEPTH_CM, SENSOR_EMPTY_DIST_CM - rawDistCm));
+}
 
 let sensorPollFailures = 0;
 
@@ -481,15 +492,15 @@ let sensorPollFailures = 0;
 // the same thing everywhere on this page. `min`/`max` set the full range the
 // gauge ring sweeps; `good`/`warn` are inclusive bands within that range.
 // Anything outside `warn` is critical. These are real aquaculture-safe
-// ranges (pH/TDS/temperature) except `level`, which inherits the same
-// TANK_HEIGHT_CM caveat noted above -- not calibrated to a real measured
-// tank depth yet.
+// ranges (pH/TDS/temperature); `level` is expressed in cm of water depth and
+// its bands are percentages of the calibrated TANK_DEPTH_CM (good >= 60%,
+// warn >= 35%) rather than an absolute number.
 // ---------------------------------------------------------------------------
 const SENSOR_CONFIG = {
   ph:    { label: "pH",  min: 0, max: 14,          good: [6.5, 8.5], warn: [6.45, 8.55], format: v => v.toFixed(2) },
   tds:   { label: "TDS", min: 0, max: 1000,        good: [0, 500],   warn: [0, 560],     format: v => `${Math.round(v)}` },
   temp:  { label: "Temperature", min: 0, max: 40,  good: [20, 30],   warn: [19, 31],     format: v => v.toFixed(1) },
-  level: { label: "Water level", min: 0, max: TANK_HEIGHT_CM, good: [20, 55], warn: [10, TANK_HEIGHT_CM], format: v => v.toFixed(1) },
+  level: { label: "Water level", min: 0, max: TANK_DEPTH_CM, good: [TANK_DEPTH_CM * 0.60, TANK_DEPTH_CM], warn: [TANK_DEPTH_CM * 0.35, TANK_DEPTH_CM], format: v => v.toFixed(1) },
 };
 const SPARKLINE_LEN = 30;
 const sensorHistory = { ph: [], tds: [], temp: [], level: [] };
@@ -586,18 +597,27 @@ async function pollSensorsAndPumps() {
       sensor.ph = 0;
       sensor.tds = 0;
       sensor.temp = 0;
-      sensor.waterLevel = 0;
+      // A raw ultrasonic distance of 0 cm is physically impossible (the
+      // sensor's own minimum range is a few cm), so 0 here is really "no
+      // reading". Use null so the level tile shows NO DATA instead of
+      // converting 0 into a fake 100%-full tank.
+      sensor.waterLevel = null;
     }
+
+    // Raw distance -> cm of water depth, once, before anything renders it.
+    const levelCm = typeof sensor?.waterLevel === "number"
+      ? levelDepthCm(sensor.waterLevel)
+      : null;
 
     updateSensorAlertBanner({
       ph: renderSensorTile("ph", sensor?.ph),
       tds: renderSensorTile("tds", sensor?.tds),
       temp: renderSensorTile("temp", sensor?.temp),
-      level: renderSensorTile("level", sensor?.waterLevel),
+      level: renderSensorTile("level", levelCm),
     });
 
-    if (typeof sensor?.waterLevel === "number") {
-      const fillPct = Math.max(0, Math.min(100, (sensor.waterLevel / TANK_HEIGHT_CM) * 100));
+    if (levelCm != null) {
+      const fillPct = Math.max(0, Math.min(100, (levelCm / TANK_DEPTH_CM) * 100));
       document.getElementById("tankLevelPct").textContent = `${fillPct.toFixed(0)}%`;
       const waterRect = document.getElementById("tankWater");
       const tankTop = 8, tankBottom = 152, tankFullHeight = tankBottom - tankTop;
@@ -696,4 +716,3 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", upd
 loadBahadurabad();
 // Load Pond Water Quality AI models
 loadWaterQualityAI();
-

@@ -651,26 +651,7 @@ async function pollSensorsAndPumps() {
     let [sensor, pumps] = await Promise.all([fbGet("sensor"), fbGet("pumps")]);
     sensorPollFailures = 0;
 
-    // Check if the local ML backend is reachable (meaning the project is connected)
-    let isSystemConnected = false;
-    try {
-      const pingRes = await fetch(BAHADURABAD_API + "/api/v1/tds", { cache: 'no-store' });
-      if (pingRes.ok) isSystemConnected = true;
-    } catch (e) {
-      isSystemConnected = false;
-    }
-
-    // If not connected (e.g., viewing on Vercel), force sensor data to show 0
-    if (!isSystemConnected && sensor) {
-      sensor.ph = 0;
-      sensor.tds = 0;
-      sensor.temp = 0;
-      // A raw ultrasonic distance of 0 cm is physically impossible (the
-      // sensor's own minimum range is a few cm), so 0 here is really "no
-      // reading". Use null so the level tile shows NO DATA instead of
-      // converting 0 into a fake 100%-full tank.
-      sensor.waterLevel = null;
-    }
+    // Display live sensor data directly from Firebase
 
     // Raw distance -> cm of water depth, once, before anything renders it.
     // waterLevelOk === false means the firmware's last ping got no echo, so

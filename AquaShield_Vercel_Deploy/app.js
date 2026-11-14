@@ -369,6 +369,28 @@ function escapeHtml(str) {
 // ---------------------------------------------------------------------------
 const pumpState = { 1: false, 2: false };
 let cycleTimer = null;
+let isSafetyUnlocked = false;
+
+function updateSafetyLockUI() {
+  const btn = document.getElementById("safetyLockBtn");
+  if (btn) {
+    if (isSafetyUnlocked) {
+      btn.className = "neu-btn warning";
+      btn.innerHTML = "🔓 Safe Lock: UNLOCKED (Motors Enabled)";
+      btn.setAttribute("aria-pressed", "true");
+    } else {
+      btn.className = "neu-btn";
+      btn.innerHTML = "🔒 Safe Lock: LOCKED (Motors Disabled)";
+      btn.setAttribute("aria-pressed", "false");
+    }
+  }
+
+  if (!cycleTimer) {
+    setManualPumpControlsEnabled(isSafetyUnlocked);
+    const startBtn = document.getElementById("startCycle");
+    if (startBtn) startBtn.disabled = !isSafetyUnlocked;
+  }
+}
 
 function setPump(num, isOn, { write = true } = {}) {
   pumpState[num] = isOn;
@@ -396,9 +418,18 @@ function setManualPumpControlsEnabled(enabled) {
 
 [1, 2].forEach((num) => {
   document.getElementById(`pump${num}Toggle`).addEventListener("click", () => {
+    if (!isSafetyUnlocked) return;
     setPump(num, !pumpState[num]);
   });
 });
+
+const safetyLockBtn = document.getElementById("safetyLockBtn");
+if (safetyLockBtn) {
+  safetyLockBtn.addEventListener("click", () => {
+    isSafetyUnlocked = !isSafetyUnlocked;
+    updateSafetyLockUI();
+  });
+}
 
 // --- Water cycle: timed drain, then timed refill, automatically ---
 function setCycleUI({ running, phase, progressPct, statusText }) {
@@ -409,7 +440,9 @@ function setCycleUI({ running, phase, progressPct, statusText }) {
   bar.style.width = `${progressPct ?? 0}%`;
   bar.classList.toggle("phase-refill", phase === "refill");
   document.getElementById("cycleStatus").textContent = statusText;
-  setManualPumpControlsEnabled(!running);
+  setManualPumpControlsEnabled(running ? false : isSafetyUnlocked);
+  const startBtn = document.getElementById("startCycle");
+  if (startBtn) startBtn.disabled = running || !isSafetyUnlocked;
 }
 
 function runPhase(pumpNum, otherPumpNum, durationSec, phaseLabel, phaseClass, onDone) {
@@ -437,14 +470,16 @@ function runPhase(pumpNum, otherPumpNum, durationSec, phaseLabel, phaseClass, on
 }
 
 document.getElementById("startCycle").addEventListener("click", () => {
-  const drainSec = Math.max(1, parseInt(document.getElementById("drainSeconds").value, 10) || 30);
-  const refillSec = Math.max(1, parseInt(document.getElementById("refillSeconds").value, 10) || 30);
+  if (!isSafetyUnlocked) return;
+  const drainSec = Math.max(1, parseInt(document.getElementById("drainSeconds").value, 10) || 10);
+  const refillSec = Math.max(1, parseInt(document.getElementById("refillSeconds").value, 10) || 10);
 
   setCycleUI({ running: true, phase: "drain", progressPct: 0, statusText: `Draining… ${drainSec}s remaining` });
 
   runPhase(1, 2, drainSec, "Draining", "drain", () => {
     runPhase(2, 1, refillSec, "Refilling", "refill", () => {
       setCycleUI({ running: false, phase: null, progressPct: 0, statusText: "Cycle complete ✓" });
+      updateSafetyLockUI();
     });
   });
 });
@@ -453,6 +488,10 @@ document.getElementById("cancelCycle").addEventListener("click", () => {
   if (cycleTimer) clearInterval(cycleTimer);
   cycleTimer = null;
   setPump(1, false);
+  setPump(2, false);
+  setCycleUI({ running: false, phase: null, progressPct: 0, statusText: "Cancelled." });
+  updateSafetyLockUI();
+});
   setPump(2, false);
   setCycleUI({ running: false, phase: null, progressPct: 0, statusText: "Cancelled." });
 });
@@ -480,7 +519,34 @@ const SENSOR_EMPTY_DIST_CM = 32.9;
 const SENSOR_FULL_DIST_CM  = 18.0;
 const TANK_DEPTH_CM = SENSOR_EMPTY_DIST_CM - SENSOR_FULL_DIST_CM; // 14.9
 
-function levelDepthCm(rawDistCm) {
+// An HC-SR04-style sensor reports 0 when it gets no echo (probe unplugged,
+// out of range, or the surface reflects the pulse away). 0 is "no
+// measurement", NOT "the water is touching the sensor" -- converting it
+// would give 32.9 - 0 = 32.9, clamp to TANK_DEPTH_CM and show a tank that is
+// 100% full while it is actually empty. Anything below the sensor's ~2 cm
+// minimum range is therefore treated as NO DATA, not as a depth.
+const SENSOR_MIN_VALID_DIST_CM = 2.0;
+
+// A real echo can also come back off something that is NOT the water surface
+// (tank rim, a hand, a rough or foamy surface) and land anywhere in range.
+// The tank is 14.9 cm deep, so anything closer than the full mark minus a
+// 2 cm tolerance is physically impossible and is treated as a bad echo.
+const SENSOR_MIN_PLAUSIBLE_DIST_CM = SENSOR_FULL_DIST_CM - 2.0; // 16.0
+
+/**
+ * Raw ultrasonic distance (cm) -> cm of water in the tank, or null when the
+ * reading must not be shown.
+ *
+ * @param {number} rawDistCm  /sensor/waterLevel (raw distance, cm)
+ * @param {boolean} [okFlag]  /sensor/waterLevelOk. false = the firmware's last
+ *                            ping got no echo, so waterLevel is a stale value.
+ *                            Omitted/undefined is treated as true so an older
+ *                            firmware build still renders.
+ */
+function levelDepthCm(rawDistCm, okFlag) {
+  if (okFlag === false) return null;
+  if (!Number.isFinite(rawDistCm) || rawDistCm < SENSOR_MIN_VALID_DIST_CM) return null;
+  if (rawDistCm < SENSOR_MIN_PLAUSIBLE_DIST_CM) return null;
   return Math.max(0, Math.min(TANK_DEPTH_CM, SENSOR_EMPTY_DIST_CM - rawDistCm));
 }
 
@@ -522,10 +588,15 @@ function renderSensorTile(key, value) {
   // /sensor/ph after a successful calibration) -- show that honestly
   // instead of a fabricated number or a silent gap.
   if (value == null || Number.isNaN(value)) {
-    document.getElementById(`tile-${key}`).textContent = key === "ph" ? "—" : "—";
+    document.getElementById(`tile-${key}`).textContent = "—";
     const chip = document.getElementById(`chip-${key}`);
     chip.className = "status-chip muted tile-chip";
     chip.innerHTML = `<span class="status-dot"></span>${key === "ph" ? "NOT CALIBRATED" : "NO DATA"}`;
+    const ring = document.getElementById(`gauge-${key}`);
+    if (ring) {
+      ring.style.setProperty("--gauge-pct", "0");
+      ring.style.setProperty("--gauge-color", "var(--text-muted)");
+    }
     return null;
   }
 
@@ -605,8 +676,10 @@ async function pollSensorsAndPumps() {
     }
 
     // Raw distance -> cm of water depth, once, before anything renders it.
+    // waterLevelOk === false means the firmware's last ping got no echo, so
+    // /sensor/waterLevel is a stale value left from the last good measurement.
     const levelCm = typeof sensor?.waterLevel === "number"
-      ? levelDepthCm(sensor.waterLevel)
+      ? levelDepthCm(sensor.waterLevel, sensor.waterLevelOk)
       : null;
 
     updateSensorAlertBanner({
@@ -624,6 +697,11 @@ async function pollSensorsAndPumps() {
       const waterHeight = (fillPct / 100) * tankFullHeight;
       waterRect.setAttribute("y", tankBottom - waterHeight);
       waterRect.setAttribute("height", waterHeight);
+    } else {
+      // No valid echo right now: do not keep showing the last good level as if
+      // it were live. The tank graphic stays where it is, but the number is
+      // labelled as missing.
+      document.getElementById("tankLevelPct").textContent = "—";
     }
 
     // Reconcile pump chips/buttons to whatever Firebase actually reports --
@@ -708,6 +786,7 @@ document.getElementById('btnTestAnomaly')?.addEventListener('click', () => {
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
+updateSafetyLockUI();
 loadStations();
 pollSensorsAndPumps();
 setInterval(pollSensorsAndPumps, 3000);

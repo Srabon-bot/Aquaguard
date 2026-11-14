@@ -169,6 +169,13 @@ code {
 }
 .neu-btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
 
+.neu-btn.warning {
+  background: var(--status-warning);
+  color: #ffffff;
+  box-shadow: 5px 5px 10px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
+}
+.neu-btn.warning:hover:not(:disabled) { filter: brightness(1.08); }
+
 .icon-btn { padding: 10px; border-radius: 50%; font-size: 1.1rem; line-height: 1; }
 
 .neu-input {

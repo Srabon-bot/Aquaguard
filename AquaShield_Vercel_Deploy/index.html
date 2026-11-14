@@ -53,7 +53,7 @@
     <section class="panel neu-raised" aria-label="Tank state">
       <div class="panel-header-row">
         <h2>Tank state</h2>
-        <span class="demo-badge" title="Computed from the real water-level sensor, but the fill % assumes a placeholder tank depth (60cm) until the sensor's real mount height is measured and calibrated — see app.js's TANK_HEIGHT_CM comment.">APPROXIMATE FILL %</span>
+        <span class="demo-badge" title="Computed from the real water-level sensor and converted with the measured tank calibration (empty = 32.9 cm, full = 18.0 cm, usable depth 14.9 cm) — see app.js's SENSOR_EMPTY_DIST_CM / SENSOR_FULL_DIST_CM constants.">CALIBRATED FILL %</span>
       </div>
       <div class="tank-visual-wrap">
         <svg id="tankSvg" viewBox="0 0 120 160" class="tank-svg" aria-hidden="true">
@@ -134,7 +134,7 @@
             <span id="tile-level" class="stat-value">—</span>
           </div>
           <div class="stat-tile-info">
-            <span class="stat-sub">cm from sensor · fill depth</span>
+            <span class="stat-sub">cm of water · calibrated tank</span>
             <svg id="spark-level" class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
           </div>
         </div>
@@ -154,6 +154,7 @@
   <section class="panel" aria-label="Pump control">
     <div class="panel-header-row">
       <h2>Pump control</h2>
+      <button id="safetyLockBtn" class="neu-btn" type="button" title="Toggle safety lock to enable or disable motor controls">🔒 Safe Lock: LOCKED (Motors Disabled)</button>
     </div>
 
     <div class="grid-2">
@@ -180,10 +181,10 @@
 
       <div class="cycle-inputs">
         <label class="field-label" for="drainSeconds">Drain duration (sec)
-          <input id="drainSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="30">
+          <input id="drainSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="10">
         </label>
         <label class="field-label" for="refillSeconds">Refill duration (sec)
-          <input id="refillSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="30">
+          <input id="refillSeconds" class="neu-input cycle-input" type="number" min="1" max="600" value="10">
         </label>
       </div>
 

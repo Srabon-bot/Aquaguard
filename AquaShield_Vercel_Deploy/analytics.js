@@ -12,6 +12,39 @@
 const FIREBASE_BASE_URL = "https://aquasheild-2e2ca-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 // ---------------------------------------------------------------------------
+// Tank calibration -- identical constants to app.js. /history stores `level`
+// as the RAW ultrasonic distance from the sensor down to the water surface
+// (smaller = more water), so it must be converted to water depth here too,
+// otherwise this page's chart would be upside-down relative to the dashboard.
+//   sensor -> bottom, tank empty  = 32.9 cm
+//   sensor -> water surface, full = 18.0 cm  ->  usable depth 14.9 cm
+// ---------------------------------------------------------------------------
+const SENSOR_EMPTY_DIST_CM = 32.9;
+const SENSOR_FULL_DIST_CM  = 18.0;
+const TANK_DEPTH_CM = SENSOR_EMPTY_DIST_CM - SENSOR_FULL_DIST_CM; // 14.9
+
+// See app.js: a raw distance of 0 means "no echo / no measurement", not a
+// full tank, so it must be dropped rather than converted. Echoes closer than
+// the full mark (minus 2 cm tolerance) are physically impossible and are bad
+// reflections off the rim / a hand / foam, so they are dropped too.
+const SENSOR_MIN_VALID_DIST_CM = 2.0;
+const SENSOR_MIN_PLAUSIBLE_DIST_CM = SENSOR_FULL_DIST_CM - 2.0; // 16.0
+
+/**
+ * Raw ultrasonic distance (cm) -> cm of water in the tank, or null when the
+ * reading must not be shown.
+ *
+ * @param {number} rawDistCm  /history/{id}/level (raw distance, cm)
+ * @param {boolean} [okFlag]  levelOk or waterLevelOk flag if recorded
+ */
+function levelDepthCm(rawDistCm, okFlag) {
+  if (okFlag === false) return null;
+  if (!Number.isFinite(rawDistCm) || rawDistCm < SENSOR_MIN_VALID_DIST_CM) return null;
+  if (rawDistCm < SENSOR_MIN_PLAUSIBLE_DIST_CM) return null;
+  return Math.max(0, Math.min(TANK_DEPTH_CM, SENSOR_EMPTY_DIST_CM - rawDistCm));
+}
+
+// ---------------------------------------------------------------------------
 // Theme (match whatever the user last picked on the main dashboard).
 // ---------------------------------------------------------------------------
 (function initTheme() {
@@ -100,7 +133,12 @@ function bucketRecords(records, period) {
     if (bucketIndex < 0 || bucketIndex >= cfg.bucketCount) continue;
     for (const key of SENSOR_KEYS) {
       const v = rec[FIREBASE_KEY_FOR[key]];
-      if (typeof v === "number") raw[bucketIndex][key].push(v);
+      if (typeof v !== "number") continue;
+      // `level` is raw sensor distance in the database -- convert to cm of
+      // water depth (null = faulty/no-echo reading, drop it) before it
+      // reaches the chart.
+      const val = key === "level" ? levelDepthCm(v, rec.levelOk ?? rec.waterLevelOk) : v;
+      if (val != null) raw[bucketIndex][key].push(val);
     }
   }
 

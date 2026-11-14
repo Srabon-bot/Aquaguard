@@ -492,9 +492,6 @@ document.getElementById("cancelCycle").addEventListener("click", () => {
   setCycleUI({ running: false, phase: null, progressPct: 0, statusText: "Cancelled." });
   updateSafetyLockUI();
 });
-  setPump(2, false);
-  setCycleUI({ running: false, phase: null, progressPct: 0, statusText: "Cancelled." });
-});
 
 // ---------------------------------------------------------------------------
 // Live sensor data — polled from Firebase (/sensor/*), the same path
